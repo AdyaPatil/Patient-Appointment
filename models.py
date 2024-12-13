@@ -6,6 +6,8 @@ from sqlalchemy.orm import relationship
 
 
 
+
+# Model For Doctors Table
 def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.regno = random.randint(1000, 9999)
@@ -31,7 +33,8 @@ class Doctor(Base):
     appointments = relationship("Appointment", back_populates="doctor")
     
     
-    
+
+# Model for Paatient Table  
 def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Generate a random 10-digit integer UID
@@ -68,6 +71,7 @@ class Patient(Base):
     appointments = relationship("Appointment", back_populates="patient")
     
 
+# Models for Appointment Table
 class AppointmentStatus(PyEnum):
     PENDING = "PENDING"
     CHECKED = "CHECKED"
