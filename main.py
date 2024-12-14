@@ -676,7 +676,7 @@ async def patient_authenticate(patient: PatientLoginRequest, db: db_dependency):
 
 
 @app.post("/appointments", status_code=status.HTTP_201_CREATED)
-async def create_appointment(appointment: Appointment, db: db_dependency, token: str = Depends(get_token)):
+async def create_appointment(appointment: Appointment, db: db_dependency):
     patient = (
         db.query(models.Patient)
         .filter(models.Patient.uid == appointment.patient_uid)
@@ -686,17 +686,13 @@ async def create_appointment(appointment: Appointment, db: db_dependency, token:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
         )
+
     doctor = (
         db.query(models.Doctor)
         .filter(models.Doctor.regno == appointment.doctor_regno)
         .first()
     )
-    if not doctor:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Doctor not found"
-        )
-    
-    if Doctor.regno.is_deleted == True:
+    if not doctor or doctor.is_deleted:  # Access `is_deleted` on the retrieved `doctor` object
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Doctor not found"
         )
@@ -712,17 +708,17 @@ async def create_appointment(appointment: Appointment, db: db_dependency, token:
     db.add(new_appointment)
     db.commit()
     db.refresh(new_appointment)
-    
-    if token is not None:
-        return {
-            "id": new_appointment.id,
-            "patient_uid": appointment.patient_uid,
-            "date_time": new_appointment.date_time,
-            "day": new_appointment.day,
-            "symptoms": new_appointment.symptoms,
-            "status": new_appointment.status.value,
-            "token" : token
-        }
+
+    return {
+        "id": new_appointment.id,
+        "patient_uid": appointment.patient_uid,
+        "date_time": new_appointment.date_time,
+        "day": new_appointment.day,
+        "symptoms": new_appointment.symptoms,
+        "status": new_appointment.status.value,
+    }
+
+
 
 
 # Get All Apointments of each Patient
@@ -823,20 +819,32 @@ async def get_single_appointment(id: str, appointment_date: date, db: db_depende
 
 
 # Update Apointment using apointment id
-@app.put("/appointment/{appointment_id}", status_code=status.HTTP_200_OK)
+@app.put("/patient/{id}/appointment/{appointment_id}", status_code=status.HTTP_200_OK)
 async def update_appointment(
-    appointment_id: int, updated_data: dict, db: db_dependency,  token: str = Depends(get_token)
+    id: str, 
+    appointment_id: int, 
+    updated_data: dict, 
+    db: db_dependency,  
+    token: str = Depends(get_token)
 ):
-
+    
     appointment = (
         db.query(models.Appointment)
         .filter(models.Appointment.id == appointment_id)
         .first()
     )
 
+   
     if not appointment:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found"
+        )
+
+   
+    if appointment.patient_uid != id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient ID does not match appointment's patient UID",
         )
 
     if appointment.is_deleted:
@@ -845,31 +853,38 @@ async def update_appointment(
             detail="Cannot update a deleted appointment",
         )
 
+
     for key, value in updated_data.items():
         if hasattr(appointment, key) and value is not None:
             setattr(appointment, key, value)
 
+    
     db.commit()
     db.refresh(appointment)
 
-    if token is not None:
-        return {
-            "detail": f"Appointment with id {appointment_id} updated successfully",
-            "updated_data": {
-                "id": appointment.id,
-                "date_time": appointment.date_time,
-                "day": appointment.day,
-                "doctor_regno": appointment.doctor_regno,
-                "is_deleted": appointment.is_deleted,
-            },
-            "token" : token
-        }
+    return {
+        "detail": f"Appointment with id {appointment_id} updated successfully",
+        "updated_data": {
+            "id": appointment.id,
+            "date_time": appointment.date_time,
+            "day": appointment.day,
+            "doctor_regno": appointment.doctor_regno,
+            "is_deleted": appointment.is_deleted,
+        },
+        "token": token,
+    }
+
 
 
 # Delete or Cancel Apointment
-@app.delete("/appointment/{appointment_id}", status_code=status.HTTP_200_OK)
-async def delete_appointment(appointment_id: int, db: db_dependency,  token: str = Depends(get_token)):
-
+@app.delete("/patient/{id}/appointment/{appointment_id}", status_code=status.HTTP_200_OK)
+async def delete_appointment(
+    id: str,
+    appointment_id: int,
+    db: db_dependency,
+    token: str = Depends(get_token),
+):
+    
     appointment = (
         db.query(models.Appointment)
         .filter(models.Appointment.id == appointment_id)
@@ -881,24 +896,32 @@ async def delete_appointment(appointment_id: int, db: db_dependency,  token: str
             status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found"
         )
 
+    if appointment.patient_uid != id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient ID does not match appointment's patient UID",
+        )
+
     if appointment.is_deleted:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Appointment with ID {appointment_id} is already marked as deleted",
         )
 
+   
     appointment.is_deleted = True
     db.commit()
 
-    if token is not None:
-        return {
-            "detail": f"Appointment with ID {appointment_id} has been marked as deleted",
-            "token" : token
-        }
+    
+    return {
+        "detail": f"Appointment with ID {appointment_id} has been marked as deleted",
+        "token": token,
+    }
+
 
 
 # Get all Doctors
-@app.get("/doctors/", status_code=status.HTTP_200_OK)
+@app.get("/patient/{id}/doctors/", status_code=status.HTTP_200_OK)
 async def get_all_doctors(db: db_dependency,  token: str = Depends(get_token)):
 
     doctors = db.query(models.Doctor).filter(models.Doctor.is_deleted == False).all()
@@ -923,7 +946,7 @@ async def get_all_doctors(db: db_dependency,  token: str = Depends(get_token)):
 
 
 # Get single Doctor
-@app.get("/doctor/{regno}", status_code=status.HTTP_200_OK)
+@app.get("/patient/{id}/doctor/{regno}", status_code=status.HTTP_200_OK)
 async def get_single_doctor(regno: str, db: db_dependency,  token: str = Depends(get_token)):
 
     doctor = (
@@ -1038,16 +1061,16 @@ async def delete_patient(id: int, db: db_dependency,  token: str = Depends(get_t
 
 
 # Extra For Filtering
-@app.get("/doc/{doc_regno}/appointments/date/{appointment_date}")
+@app.get("/doc/{id}/appointments/date/{appointment_date}")
 async def get_appointments_by_date(
-    doc_regno: str, appointment_date: date, db: db_dependency,  token: str = Depends(get_token)
+    id: str, appointment_date: date, db: db_dependency,  token: str = Depends(get_token)
 ):
 
     appointments = (
         db.query(models.Appointment)
         .join(models.Doctor, models.Appointment.doctor_regno == models.Doctor.regno)
         .options(joinedload(models.Appointment.patient))
-        .filter(models.Doctor.regno == doc_regno)
+        .filter(models.Doctor.regno == id)
         .filter(cast(models.Appointment.date_time, Date) == appointment_date)
         .all()
     )
@@ -1079,8 +1102,10 @@ async def get_appointments_by_date(
                 "patient": patient_data,
             }
         )
+        
+    if token is not None:
+        return {"appointments_data" : appointments_data, "token" : token }
 
-    return appointments_data
 
 
 @app.get("/patient/{id}/appointments/date/{appointment_date}")
