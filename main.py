@@ -1,6 +1,6 @@
 # Importing dependencies and packages 
 from fastapi import FastAPI, HTTPException, Depends, status, Path, Query, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import Annotated
 import models
 from database import engine, SessionLocal
@@ -14,8 +14,19 @@ import jwt
 from jwt import PyJWTError
 from sqlalchemy import cast, Date
 from datetime import timedelta
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Allow CORS for all origins (you can restrict this to specific origins later)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (or specify a list of domains here)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -32,7 +43,7 @@ class Doctor(BaseModel):
 
 
 class DoctorLoginRequest(BaseModel):
-    regno: int
+    mobile: int
     password: str
 
     class Config:
@@ -54,9 +65,15 @@ class Patient(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+@validator('date_of_birth')
+def validate_date_of_birth(cls, v):
+        # Assuming the format is dd-mm-yyyy, you can parse it into a datetime object
+        return datetime.strptime(v, "%d-%m-%Y").date()  # Converting to date object
+
+
 
 class PatientLoginRequest(BaseModel):
-    uid: int
+    mobile: str
     password: str
 
     class Config:
@@ -71,7 +88,8 @@ class AppointmentStatusEnum(str, Enum):
 class Appointment(BaseModel):
     patient_uid: int
     doctor_regno: int
-    date_time: date
+    date: date
+    time: str
     day: str
     symptoms: str
     is_deleted: bool = False
@@ -179,7 +197,7 @@ async def add_doctor(doctor: Doctor, db: db_dependency):
 async def authenticate_doctor(doctor: DoctorLoginRequest, db: db_dependency):
 
     db_doctor = (
-        db.query(models.Doctor).filter(models.Doctor.regno == doctor.regno).first()
+        db.query(models.Doctor).filter(models.Doctor.mobile == doctor.mobile).first()
     )
 
     if not db_doctor:
@@ -241,7 +259,8 @@ async def get_appointments_for_doctor(id: str, db: db_dependency, token: str = D
             {
                 "appointment_id": appointment.id,
                 "appointment_symptoms": appointment.symptoms,
-                "date_time": appointment.date_time,
+                "date": appointment.date,
+                "time":appointment.time,
                 "day": appointment.day,
                 "is_deleted": appointment.is_deleted,
                 "patient_info": {
@@ -509,10 +528,13 @@ async def get_patients_for_doctor_with_appointments(id: str, db: db_dependency, 
             {
                 "patient_uid": patient.uid,
                 "patient_name": f"{patient.firstname} {patient.lastname}",
+                "patient_disease":patient.disease,
                 "appointments": [
                     {
                         "appointment_id": appointment.id,
-                        "date_time": appointment.date_time,
+                        "date": appointment.date,
+                        "time":appointment.time,
+                        "symptoms":appointment.symptoms,
                         "status": appointment.status,
                         "is_deleted": appointment.is_deleted,
                     }
@@ -522,6 +544,7 @@ async def get_patients_for_doctor_with_appointments(id: str, db: db_dependency, 
             }
             for patient in patients_with_appointments
         ]
+       
 
 
 # Get Doctor Profile
@@ -623,6 +646,7 @@ async def delete_doctor(id: str, db: db_dependency, token: str = Depends(get_tok
 async def add_patient(patient: Patient, db: db_dependency):
     hashed_password = hash_password(patient.password)
     uid = models.generate_unique_uid(db)
+    print(Patient)
     db_patient = models.Patient(
         uid=uid,
         firstname=patient.firstname,
@@ -638,6 +662,7 @@ async def add_patient(patient: Patient, db: db_dependency):
     db.add(db_patient)
     db.commit()
     db.refresh(db_patient)
+    print(db_patient)
     return db_patient
 
 
@@ -646,7 +671,7 @@ async def add_patient(patient: Patient, db: db_dependency):
 async def patient_authenticate(patient: PatientLoginRequest, db: db_dependency):
 
     db_patient = (
-        db.query(models.Patient).filter(models.Patient.uid == patient.uid).first()
+        db.query(models.Patient).filter(models.Patient.mobile_number == patient.mobile).first()
     )
 
     if not db_patient:
@@ -675,8 +700,8 @@ async def patient_authenticate(patient: PatientLoginRequest, db: db_dependency):
     }
 
 
-@app.post("/appointments", status_code=status.HTTP_201_CREATED)
-async def create_appointment(appointment: Appointment, db: db_dependency):
+@app.post("/patient/{id}/appointments", status_code=status.HTTP_201_CREATED)
+async def create_appointment(appointment: Appointment, db: db_dependency, token: str = Depends(get_token)):
     patient = (
         db.query(models.Patient)
         .filter(models.Patient.uid == appointment.patient_uid)
@@ -700,7 +725,8 @@ async def create_appointment(appointment: Appointment, db: db_dependency):
     new_appointment = models.Appointment(
         patient_uid=patient.uid,
         doctor_regno=doctor.regno,
-        date_time=appointment.date_time,
+        date=appointment.date,
+        time=appointment.time,
         day=appointment.day,
         symptoms=appointment.symptoms,
         status=appointment.status,
@@ -709,14 +735,16 @@ async def create_appointment(appointment: Appointment, db: db_dependency):
     db.commit()
     db.refresh(new_appointment)
 
-    return {
-        "id": new_appointment.id,
-        "patient_uid": appointment.patient_uid,
-        "date_time": new_appointment.date_time,
-        "day": new_appointment.day,
-        "symptoms": new_appointment.symptoms,
-        "status": new_appointment.status.value,
-    }
+    if token is not None:
+        return {
+            "id": new_appointment.id,
+            "patient_uid": appointment.patient_uid,
+            "date": new_appointment.date,
+            "time":new_appointment.time,
+            "day": new_appointment.day,
+            "symptoms": new_appointment.symptoms,
+            "status": new_appointment.status.value,
+        }
 
 
 
@@ -751,7 +779,13 @@ async def get_patient_appointments(id: str, db: db_dependency, token: str = Depe
             status_code=status.HTTP_404_NOT_FOUND, detail="Appointment Not Yet Created"
         )
     
-    
+    # Fetch the doctor's details and include them in the response
+    for appointment in appointments:
+        doctor = db.query(models.Doctor).filter(models.Doctor.regno == appointment.doctor_regno).first()
+        if doctor:
+            appointment.doctor_name = f"Dr. {doctor.firstname} {doctor.lastname}"  # Combine first name and last name
+            
+            
     if token is not None:
         return {
             "patient_name": f"{db_patient.firstname} {db_patient.lastname}",
@@ -780,7 +814,7 @@ async def get_single_appointment(id: str, appointment_date: date, db: db_depende
     appointment = (
         db.query(models.Appointment)
         .filter(
-            models.Appointment.date_time == appointment_date,
+            models.Appointment.date == appointment,
             models.Appointment.patient_uid == db_patient.uid,
             models.Appointment.is_deleted == False,
         )
@@ -809,7 +843,7 @@ async def get_single_appointment(id: str, appointment_date: date, db: db_depende
             "patient_name": f"{db_patient.firstname} {db_patient.lastname}",
             "appointment": {
                 "id": appointment.id,
-                "date_time": appointment.date_time,
+                "date": appointment.date,
                 "day": appointment.day,
                 "doctor_name": f"{doctor.firstname} {doctor.lastname}",
                 "is_deleted": appointment.is_deleted,
@@ -997,7 +1031,7 @@ async def get_patient_profile(id: str, db: db_dependency,  token: str = Depends(
         "address": patient.address,
         "date_of_birth": patient.date_of_birth,
     }
-
+    print(patient_profile)
     if token is not None:
         return {"patient": patient_profile, "token" : token}
 
@@ -1071,7 +1105,7 @@ async def get_appointments_by_date(
         .join(models.Doctor, models.Appointment.doctor_regno == models.Doctor.regno)
         .options(joinedload(models.Appointment.patient))
         .filter(models.Doctor.regno == id)
-        .filter(cast(models.Appointment.date_time, Date) == appointment_date)
+        .filter(cast(models.Appointment.date, Date) == appointment_date)
         .all()
     )
 
@@ -1118,7 +1152,7 @@ async def get_appointments_by_date(
         .join(models.Patient, models.Appointment.patient_uid == models.Patient.uid)
         .options(joinedload(models.Appointment.doctor))
         .filter(models.Patient.uid == id)
-        .filter(cast(models.Appointment.date_time, Date) == appointment_date)
+        .filter(cast(models.Appointment.date, Date) == appointment_date)
         .all()
     )
 
@@ -1137,13 +1171,14 @@ async def get_appointments_by_date(
         appointments_data.append(
             {
                 "appointment_id": appointment.id,
-                "date_time": appointment.date_time,
+                "date": appointment.date,
                 "day": appointment.day,
                 "symptoms": appointment.symptoms,
                 "status": appointment.status.value,
                 "doctor": doctor_data,
             }
         )
+        print(appointments_data)
     if token is not None:
         return {"appointments_data" : appointments_data, "token" : token }
 

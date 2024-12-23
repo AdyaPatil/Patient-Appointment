@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Enum, Date, ForeignKey, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, Enum, Date, ForeignKey, Time
 from database import Base
 from enum import Enum as PyEnum
 import random
@@ -82,7 +82,8 @@ class Appointment(Base):
     id = Column(Integer, primary_key=True, index=True)
     patient_uid = Column(String(10), ForeignKey("patients.uid"), nullable=False)
     doctor_regno = Column(String(4), ForeignKey("doctors.regno"), nullable=False)
-    date_time = Column(DateTime, nullable=False)
+    date = Column(Date, nullable=False)
+    time = Column(String(10), nullable=False)
     day = Column(String(10), nullable=False)  # Store day as a string (e.g., 'Monday')
     symptoms = Column(String(255))
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.PENDING)
