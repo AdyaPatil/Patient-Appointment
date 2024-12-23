@@ -1,0 +1,87 @@
+/* Custom CSS */
+body {
+    font-family: Arial, sans-serif;
+    background-image: url(asset/background1.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.hero-section {
+    background: url('https://via.placeholder.com/1920x800') no-repeat center center/cover;
+    padding: 100px 0;
+}
+
+.feature-box {
+    margin: 15px 0;
+}
+
+footer p {
+    margin: 0;
+}
+
+/* Service Section */
+.card {
+    border: none;
+    transition: transform 0.3s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-title {
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+/* Our Dentist Section */
+.social-icons {
+    background-color: #f8f9fa; /* Light grey background */
+}
+
+.social-icons a {
+    text-decoration: none;
+    font-size: 1.5rem; /* Larger icons */
+}
+
+.card-img-top {
+    object-fit: cover;
+    height: 400px;
+}
+
+.position-relative {
+    overflow: hidden;
+}
+
+/* Footer Section */
+footer {
+    background-color: #212529; /* Dark background */
+    color: #ffffff; /* Light text */
+}
+
+footer h5 {
+    color: #f8f9fa; /* Light headings */
+}
+
+footer a {
+    color: #bbbbbb; /* Light gray links */
+    transition: color 0.3s ease-in-out;
+}
+
+footer a:hover {
+    color: #00bcd4; /* Highlight color on hover */
+}
+
+footer .social-icons a {
+    font-size: 1.8rem; /* Social icons size */
+    transition: transform 0.3s ease-in-out;
+}
+
+footer .social-icons a:hover {
+    transform: scale(1.1); /* Slight zoom on hover */
+}
+

@@ -1,0 +1,66 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Patient UID</th>
+            <th>Doctor Reg No</th>
+            <th>Date & Time</th>
+            <th>Day</th>
+            <th>Symptoms</th>
+            <th>Status</th>
+            <th>Is Deleted</th>
+        </tr>
+    </thead>
+    <tbody id="appointments-table-body">
+        <!-- Appointments data will be inserted here dynamically -->
+    </tbody>
+</table>
+
+<script>
+
+    
+// Assuming the patient UID is available after login or from a session
+// For demonstration, let's use a hardcoded patient ID for now
+const patientId = '9402794595';  // Replace with the logged-in patient's UID
+fetchAppointments(patientId);  // Fetch and render appointments for this patient
+   // Function to fetch and display appointments for a specific patient
+function fetchAppointments(patientId) {
+    const url = `http://127.0.0.1:8000/patient/${patientId}/appointments`; // Replace :id with the patientId
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.appointments) {
+                renderAppointmentsTable(data.appointments);  // Call function to render appointments
+            } else {
+                console.error('No appointments found for this patient');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching appointments:', error);
+        });
+}
+
+// Function to render the appointments table
+function renderAppointmentsTable(appointments) {
+    const tableBody = document.getElementById('appointments-table-body');
+    tableBody.innerHTML = '';  // Clear any previous data
+
+    appointments.forEach(appointment => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${appointment.id}</td>
+            <td>${appointment.patient_uid}</td>
+            <td>${appointment.doctor_regno}</td>
+            <td>${appointment.date_time}</td>
+            <td>${appointment.day}</td>
+            <td>${appointment.symptoms}</td>
+            <td>${appointment.status}</td>
+            <td>${appointment.is_deleted === true ? 'Yes' : 'No'}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+
+</script>

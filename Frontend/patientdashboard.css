@@ -1,0 +1,186 @@
+
+    .body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background-color: #f8f9fa;
+    }
+
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      position: fixed;
+      background: linear-gradient(135deg, #007bff, #6610f2);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 10px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar h4 {
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      text-decoration: none;
+      color: #fff;
+      padding: 12px 15px;
+      margin: 5px 0;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    .header {
+      margin-left: 250px;
+      height: 60px;
+      background-color: #343a40;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h5 {
+      margin: 0;
+    }
+
+    .header .user-menu {
+        display: flex;
+        align-items: center;
+        position: relative;
+        cursor: pointer;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 5px 10px;
+        border-radius: 20px;
+        transition: background-color 0.3s ease;
+      }
+      
+      .header .user-menu:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      
+      .header .user-menu img {
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+        border: 2px solid #fff;
+      }
+      
+      .header .user-menu span {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 500;
+      }
+      
+      .header .user-menu .dropdown {
+        display: none;
+        position: absolute;
+        top: 50px;
+        right: 0;
+        background: #fff;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        z-index: 1000;
+        min-width: 150px;
+      }
+      
+      .header .user-menu .dropdown a {
+        display: block;
+        padding: 10px 15px;
+        color: #343a40;
+        text-decoration: none;
+        font-size: 14px;
+        transition: background 0.2s, color 0.2s;
+      }
+      
+      .header .user-menu .dropdown a:hover {
+        background: #f8f9fa;
+        color: #007bff;
+      }
+      
+
+    .main {
+      margin-left: 250px;
+      padding: 20px;
+    }
+
+    .card {
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #007bff, #6610f2);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #6610f2, #007bff);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+
+
+    .hero {
+        display: flex;
+        align-items: center;
+        padding: 50px;
+        background-color: #f8f9fa;
+    }
+    .hero .content {
+        max-width: 50%;
+    }
+    .hero .content p {
+        font-size: 14px;
+        color: #007bff;
+        margin: 0;
+    }
+    .hero .content h1 {
+        font-size: 48px;
+        margin: 20px 0;
+    }
+    .hero .content h1 span {
+        color: #007bff;
+    }
+    .hero .content p.description {
+        font-size: 16px;
+        color: #666;
+        margin: 10px 0;
+    }
+    .hero .image {
+        max-width: 50%;
+    }
+    .hero .image img {
+        width: 100%;
+        border-radius: 10px;
+    }
+    @media (max-width: 768px) {
+        .hero {
+            flex-direction: column;
+            text-align: center;
+        }
+        .hero .content, .hero .image {
+            max-width: 100%;
+        }
+    }

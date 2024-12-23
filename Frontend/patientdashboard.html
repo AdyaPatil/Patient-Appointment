@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="patientdashboard.css" class="styleshhet">
+
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4>Patient Dashboard</h4>
+        <a href="#addAppointment" onclick="showSection('addAppointment')"><i class="fa fa-calendar-plus"></i> Add
+            Appointment</a>
+        <a href="#checkAppointment" onclick="showSection('checkAppointment')"><i class="fa fa-calendar-check"></i> Check
+            Appointments</a>
+        <a href="#settings" onclick="showSection('settings')"><i class="fa fa-cogs"></i> Settings</a>
+        <a href="#profile" onclick="showSection('profile')"><i class="fa fa-user"></i> Get Profile</a>
+        <a href="#index.html" onclick="logout()"><i class="fa fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <h5>Welcome, Patient</h5>
+        <div class="user-menu" onclick="toggleDropdown()">
+            <img src="https://via.placeholder.com/40" alt="User" id="user-image">
+            <span id="name"></span> <!-- This will be dynamically updated -->
+            <div class="dropdown">
+                <a href="#profile" onclick="showSection('profile')"><i class="fa fa-user"></i>Profile</a>
+                <a href="index.html" onclick="logout()"><i class="fa fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Fetch patient profile details after the DOM is fully loaded
+            fetchPatientProfile();
+        });
+
+        // Fetch patient profile details
+        function fetchPatientProfile() {
+            // Get the patient UID from localStorage (if it is stored during login)
+            const patientUid = localStorage.getItem('patient_uid'); // Assuming UID is stored in local storage during login
+            const token = localStorage.getItem('access_token'); // Assuming token is saved in local storage
+
+            if (!token) {
+                console.error('No token found!');
+                return;
+            }
+
+            if (!patientUid) {
+                console.error('No patient UID found!');
+                return;
+            }
+
+            const url = `http://127.0.0.1:8000/patient/${patientUid}/profile`; // Your API endpoint
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Data received from API:', data); // Log the data received
+                    if (data.patient) {
+                        const patient = data.patient;
+
+                        // Update the user menu with patient's name
+                        const nameElement = document.getElementById('name');
+                        if (nameElement) {
+                            nameElement.textContent = `${patient.firstname} ${patient.lastname}`;
+                            console.log('Updated name:', nameElement.textContent); // Log the updated name
+                        } else {
+                            console.error('Element with ID "name" not found.');
+                        }
+
+                        // Optionally, you can also update the profile image if available
+                        document.getElementById('user-image').src = patient.profile_image || "https://via.placeholder.com/40";
+                    } else {
+                        console.error('Patient details not found.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching patient details:', error);
+                });
+        }
+    </script>
+
+
+
+
+
+
+    <!-- Main Content -->
+    <div class="main" >
+        <div class="hidden">
+            <div class="hero">
+                <div class="content">
+                 <p>
+                  COMMITTED TO SUCCESS
+                 </p>
+                 <h1>
+                  WE CARE ABOUT YOUR
+                  <span>
+                   HEALTH
+                  </span>
+                 </h1>
+                 <p class="description">
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat is aute irure.
+                 </p>
+                 <p class="description">
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat is aute irure.
+                 </p>
+                </div>
+                <div class="image">
+                 <img alt="Doctor smiling with stethoscope" height="500" src="https://storage.googleapis.com/a1aa/image/wWTkhRFqgtIoHlYCxcp5EKTpGTCEH9yfgNqda6NMSRJG4teTA.jpg" width="500"/>
+                </div>
+               </div>
+        </div>
+        
+         
+        
+
+
+        <!-- Add Appointment Start -->
+        <div id="addAppointment" class="hidden">
+            <h2>Add Appointment</h2>
+            <form id="appointmentForm">
+                <div class="mb-3">
+                    <label for="doctorRegno" class="form-label">Doctor Registration No.</label>
+                    <select class="form-control" id="doctorRegno" required>
+                        <option value="" disabled selected>Select Doctor</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="appointmentDate" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="appointmentDate" required>
+                </div>
+                <div class="mb-3">
+                    <label for="appointmentTime" class="form-label">Time</label>
+                    <input type="time" class="form-control" id="appointmentTime" required>
+                </div>
+                <div class="mb-3">
+                    <label for="day" class="form-label">Day</label>
+                    <input type="text" class="form-control" id="day" value="Sunday" required>
+                </div>
+                <div class="mb-3">
+                    <label for="symptoms" class="form-label">Symptoms</label>
+                    <textarea class="form-control" id="symptoms" rows="3" required>Body Pain</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const token = localStorage.getItem('access_token');
+                const patientUid =localStorage.getItem('patient_uid');
+                if (token) {
+
+                    // Set the Patient UID field in the form
+                    document.getElementById('patientUid').value = patientUid;
+
+                    // Fetch available doctors to populate the doctor selection dropdown
+                    fetchDoctors();
+
+                    // Handle form submission
+                    document.getElementById('appointmentForm').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        addAppointment(patientUid);
+                    });
+                } else {
+                    console.error('No token found in localStorage.');
+                }
+            });
+
+            // Function to decode the JWT token and extract the payload
+            function decodeJWT(token) {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const parsedData = JSON.parse(jsonPayload);
+                return parsedData.id; // This assumes the 'id' is the patient UID
+            }
+
+            // Function to fetch doctors and populate the dropdown
+            function fetchDoctors() {
+                const token = localStorage.getItem('access_token');
+                const patientUid = localStorage.getItem('patient_uid'); // Retrieve the patient UID
+
+                if (!patientUid) {
+                    console.error('Patient UID not found in localStorage.');
+                    return;
+                }
+
+                const url = `http://127.0.0.1:8000/patient/${patientUid}/doctors/`;
+
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.doctors) {
+                            const doctorSelect = document.getElementById('doctorRegno');
+                            data.doctors.forEach(doctor => {
+                                const option = document.createElement('option');
+                                option.value = doctor.regno;
+                                option.textContent = `${doctor.firstname} ${doctor.lastname}`;
+                                doctorSelect.appendChild(option);
+                            });
+                        } else {
+                            console.error('Doctors data is missing in the response');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching doctors:', error);
+                    });
+            }
+
+            // Function to add an appointment
+            function addAppointment(patientUid) {
+                const token = localStorage.getItem('access_token');
+                const doctorRegno = document.getElementById('doctorRegno').value;
+                const appointmentDate = document.getElementById('appointmentDate').value;
+                const appointmentTime = document.getElementById('appointmentTime').value;
+                const day = document.getElementById('day').value;
+                const symptoms = document.getElementById('symptoms').value;
+
+                if (!doctorRegno || !appointmentDate || !appointmentTime || !symptoms) {
+                    console.error('All fields must be filled out.');
+                    return;
+                }
+
+                const appointmentData = {
+                    patient_uid: patientUid,
+                    doctor_regno: doctorRegno,
+                    date: appointmentDate,
+                    time: appointmentTime,
+                    day: day,
+                    symptoms: symptoms,
+                    status: 'PENDING', // Default status to PENDING
+                };
+
+                fetch(`http://127.0.0.1:8000/patient/${patientUid}/appointments`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(appointmentData),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Appointment added successfully:', data);
+                        
+                    })
+                    .catch(error => {
+                        console.error('Error adding appointment:', error);
+                    });
+            }
+        </script>
+        <!-- Add Appointment Stop -->
+
+
+        <!-- Check Appointment Start-->
+        <div id="checkAppointment" class="hidden">
+            <h2>Check Appointments</h2>
+            <div>
+                <label for="filterDate">Filter by Date: </label>
+                <input type="date" id="filterDate" onchange="filterAppointmentsByDate()" />
+            </div>
+            <p id="appointmentMessage"></p>
+            <table id="appointmentsTable" class="table table-striped" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Doctor Name</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Day</th>
+                        <th>Symptoms</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentsList"></tbody>
+            </table>
+            <!-- Pagination Controls -->
+            <div id="paginationControls" style="display: none; text-align: center;">
+                <button id="prevPage" class="btn btn-secondary" onclick="goToPage(currentPage - 1)">Previous</button>
+                <span id="pageNumber"></span>
+                <button id="nextPage" class="btn btn-secondary" onclick="goToPage(currentPage + 1)">Next</button>
+            </div>
+            <form id="appointmentForm" style="display: none;">
+                <div class="mb-3">
+                    <label for="patientUid" class="form-label">Patient UID</label>
+                    <input type="number" class="form-control" id="patientUid" required readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="doctorRegno" class="form-label">Doctor Registration No.</label>
+                    <select class="form-control" id="doctorRegno" required>
+                        <option value="" disabled selected>Select Doctor</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="appointmentDate" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="appointmentDate" required>
+                </div>
+                <div class="mb-3">
+                    <label for="appointmentTime" class="form-label">Time</label>
+                    <input type="time" class="form-control" id="appointmentTime" required>
+                </div>
+                <div class="mb-3">
+                    <label for="day" class="form-label">Day</label>
+                    <input type="text" class="form-control" id="day" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="symptoms" class="form-label">Symptoms</label>
+                    <textarea class="form-control" id="symptoms" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Update appointment</button>
+            </form>
+        </div>
+        <script>
+            function updateAppointment(appointmentId) {
+                const token = localStorage.getItem('access_token');
+                const patientUid = localStorage.getItem('patient_uid'); // Get the patient UID dynamically from localStorage
+
+                if (!token || !patientUid) {
+                    console.error('Token or Patient UID not found!');
+                    return;
+                }
+
+                const url = `http://127.0.0.1:8000/patient/${patientUid}/appointment/${appointmentId}`;
+
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.updated_data) {
+                            const appointment = data.updated_data;
+
+                            // Populate the form with existing data
+                            document.getElementById('patientUid').value = patientUid;
+                            document.getElementById('doctorRegno').innerHTML = `
+                            <option value="${appointment.doctor_regno}" selected>Doctor ${appointment.doctor_regno}</option>
+                        `;
+                            document.getElementById('appointmentDate').value = appointment.date_time.split('T')[0]; // Extract the date part
+                            document.getElementById('appointmentTime').value = appointment.date_time.split('T')[1]; // Extract the time part
+                            document.getElementById('day').value = appointment.day;
+                            document.getElementById('symptoms').value = appointment.symptoms;
+
+                            // Show the form
+                            document.getElementById('appointmentForm').style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching appointment:', error);
+                        alert('Error fetching appointment details.');
+                    });
+            }
+
+            document.getElementById('appointmentForm').addEventListener('submit', function (e) {
+                e.preventDefault(); // Prevent form from submitting in the default way
+
+                const token = localStorage.getItem('access_token');
+                const patientUid = document.getElementById('patientUid').value;
+                const doctorRegno = document.getElementById('doctorRegno').value;
+                const appointmentDate = document.getElementById('appointmentDate').value;
+                const appointmentTime = document.getElementById('appointmentTime').value;
+                const day = document.getElementById('day').value;
+                const symptoms = document.getElementById('symptoms').value;
+
+                const updatedData = {
+                    doctor_regno: doctorRegno,
+                    date_time: `${appointmentDate}T${appointmentTime}`,
+                    day: day,
+                    symptoms: symptoms,
+                };
+
+                const appointmentId = 'appointment_id_here'; // Replace with the actual appointment ID
+
+                const url = `http://127.0.0.1:8000/patient/${patientUid}/appointment/${appointmentId}`;
+
+                fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedData),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.detail) {
+                            alert(`Appointment updated successfully: ${data.detail}`);
+                            // Optionally, refresh the list of appointments or update the UI
+                            fetchAppointments(patientUid);  // Call the function to refresh the appointments
+                            document.getElementById('appointmentForm').reset();  // Clear the form
+                            document.getElementById('appointmentForm').style.display = 'none'; // Hide the form
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating appointment:', error);
+                        alert('Error updating appointment.');
+                    });
+            });
+        </script>
+        <script>
+            let currentPage = 1;
+            const appointmentsPerPage = 10;
+
+            // Fetch all appointments and update the UI
+            function fetchAppointments() {
+                const token = localStorage.getItem('access_token');
+                const patientUid = localStorage.getItem('patient_uid'); // Get the patient UID dynamically from localStorage
+
+                if (!token || !patientUid) {
+                    console.error('Token or Patient UID not found!');
+                    return;
+                }
+
+                const url = `http://127.0.0.1:8000/patient/${patientUid}/appointments`;
+
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        displayAppointments(data.appointments);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching appointments:', error);
+                        document.getElementById('appointmentMessage').textContent = 'Error fetching appointments.';
+                    });
+            }
+
+            // Filter appointments by date and update the table
+            async function filterAppointmentsByDate() {
+    const filterDate = document.getElementById('filterDate').value;
+    console.log(filterDate);
+    const patientUid = localStorage.getItem('patient_uid'); // Get the patient UID dynamically
+    const token = localStorage.getItem('access_token');
+
+    // Validate date format (YYYY-MM-DD)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(filterDate)) {
+        document.getElementById('appointmentMessage').textContent = 'Invalid date format. Please use YYYY-MM-DD.';
+        return;
+    }
+
+    if (!filterDate) {
+        fetchAppointments(); // Fetch all appointments if no date is selected
+        return;
+    }
+
+    const url = `http://127.0.0.1:8000/patient/${patientUid}/appointments/date/${filterDate}`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Error fetching appointments.');
+        }
+
+        const data = await response.json();
+        console.log('Response data:', data);
+
+        if (data && data.appointments_data && data.appointments_data.length > 0) {
+            displayAppointments(data.appointments_data);
+            console.log('Appointments:', data);
+        } else {
+            document.getElementById('appointmentMessage').textContent = 'No appointments found for the selected date.';
+            clearAppointmentsTable();
+        }
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+        document.getElementById('appointmentMessage').textContent = 'Error fetching appointments.';
+    }
+    
+}
+
+            function clearAppointmentsTable() {
+                const appointmentsList = document.getElementById('appointmentsList');
+                appointmentsList.innerHTML = ''; // Clear all rows
+                document.getElementById('appointmentsTable').style.display = 'none'; // Hide the table
+            }
+
+            // Display appointments in the table
+            function displayAppointments(appointments) {
+                const appointmentsList = document.getElementById('appointmentsList');
+                const appointmentMessage = document.getElementById('appointmentMessage');
+                const appointmentsTable = document.getElementById('appointmentsTable');
+
+                if (appointments.length === 0) {
+                    appointmentMessage.textContent = 'No appointments available.';
+                    appointmentsTable.style.display = 'none';
+                } else {
+                    appointmentMessage.textContent = '';
+                    appointmentsTable.style.display = 'table';
+
+                    // Paginate appointments (show 10 at a time)
+                    const startIndex = (currentPage - 1) * appointmentsPerPage;
+                    const endIndex = startIndex + appointmentsPerPage;
+                    const paginatedAppointments = appointments.slice(startIndex, endIndex);
+
+                    // Clear the existing table rows
+                    appointmentsList.innerHTML = '';
+
+                    // Loop through the appointments and add rows to the table
+                    paginatedAppointments.forEach((appointment, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${startIndex + index + 1}</td>
+                            <td>${appointment.doctor_name}</td>
+                            <td>${appointment.date}</td>
+                            <td>${appointment.time}</td>
+                            <td>${appointment.day}</td>
+                            <td>${appointment.symptoms}</td>
+                            <td>${appointment.status}</td>
+                            <td>
+                                ${appointment.status === "PENDING"
+                                ? `
+                                        <button class="btn btn-warning" onclick="cancelAppointment(${appointment.appointment_id})">Cancel</button>
+                                        <button class="btn btn-primary" onclick="updateAppointment(${appointment.appointment_id})">Update</button>
+                                    `
+                                : `
+                                        <button class="btn btn-danger" onclick="deleteAppointment(${appointment.appointment_id})">Delete</button>
+                                    `
+                            }
+                            </td>
+                        `;
+                        appointmentsList.appendChild(row);
+                    });
+
+                    // Show pagination controls if more than 10 appointments
+                    if (appointments.length > appointmentsPerPage) {
+                        document.getElementById('paginationControls').style.display = 'block';
+                        updatePaginationControls(appointments.length);
+                    } else {
+                        document.getElementById('paginationControls').style.display = 'none';
+                    }
+                }
+            }
+
+            // Update pagination controls
+            function updatePaginationControls(totalAppointments) {
+                const totalPages = Math.ceil(totalAppointments / appointmentsPerPage);
+                const prevBtn = document.getElementById('prevPage');
+                const nextBtn = document.getElementById('nextPage');
+                const pageNum = document.getElementById('pageNumber');
+
+                pageNum.textContent = `Page ${currentPage} of ${totalPages}`;
+
+                // Enable/disable prev and next buttons
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages;
+            }
+
+            // Handle pagination actions
+            function goToPage(pageNumber) {
+                currentPage = pageNumber;
+                fetchAppointments(); // Fetch appointments for the current page
+            }
+
+            // Example functions for cancel and delete actions
+            function cancelAppointment(appointmentId) {
+                console.log('Cancel appointment with ID:', appointmentId);
+            }
+
+            function deleteAppointment(appointmentId) {
+                console.log('Delete appointment with ID:', appointmentId);
+            }
+
+            // Fetch all appointments on page load
+            fetchAppointments();
+        </script>
+        <!-- Check Appointment Stop -->
+
+
+        <!-- Settings -->
+        <div id="settings" class="hidden">
+            <h2>Settings</h2>
+            <p>Settings section is under construction.</p>
+        </div>
+
+
+        <!-- Profile Start -->
+        <div id="profile" class="hidden">
+            <h2>Profile</h2>
+            <div class="mb-3">
+                <label for="profileName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="profileName" required readonly>
+            </div>
+            <div class="mb-3">
+                <label for="profileGender" class="form-label">Gender</label>
+                <input type="text" class="form-control" id="profileGender" required readonly>
+            </div>
+            <div class="mb-3">
+                <label for="profileAddress" class="form-label">Address</label>
+                <input type="text" class="form-control" id="profileAddress" required readonly>
+            </div>
+            <div class="mb-3">
+                <label for="profileDOB" class="form-label">Date of Birth</label>
+                <input type="text" class="form-control" id="profileDOB" required readonly>
+            </div>
+            <div class="mb-3">
+                <label for="profileMobile" class="form-label">Mobile Number</label>
+                <input type="text" class="form-control" id="profileMobile" required readonly>
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="updateProfile()">Update Profile</button>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const token = localStorage.getItem('access_token');
+                const patientUid = localStorage.getItem('patient_uid');  // Assuming this is stored in localStorage
+
+                if (patientUid && token) {
+                    // Fetch patient profile from the API
+                    fetch(`http://127.0.0.1:8000/patient/${patientUid}/profile`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.patient) {
+                                // Fill form fields with the patient data
+                                const patient = data.patient;
+                                document.getElementById('profileName').value = `${patient.firstname} ${patient.lastname}`;
+                                document.getElementById('profileGender').value = patient.gender; // Assuming gender is part of the patient object
+                                document.getElementById('profileAddress').value = patient.address;
+                                document.getElementById('profileDOB').value = patient.date_of_birth;
+                                document.getElementById('profileMobile').value = patient.mobile_number;
+                            } else {
+                                console.error('Error fetching patient profile');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching patient profile:', error);
+                        });
+                } else {
+                    console.error('No patient UID or token found');
+                }
+            });
+
+        </script>
+        <!-- Profile Stop -->
+
+
+
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.main > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        function updateProfile() {
+            const name = document.getElementById('profileName').value;
+            const email = document.getElementById('profileEmail').value;
+            alert(`Profile updated:\nName: ${name}\nEmail: ${email}`);
+        }
+    </script>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.querySelector('.user-menu .dropdown');
+            const isVisible = dropdown.style.display === 'block';
+            dropdown.style.display = isVisible ? 'none' : 'block';
+        }
+
+        function logout() {
+            alert('Logging out...');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('patient_uid');
+
+            // Redirect to the login page or perform other logout operations
+            window.location.href = '/'; // Update with your login page URL
+        }
+
+        // Close dropdown if clicked outside
+        document.addEventListener('click', function (event) {
+            const userMenu = document.querySelector('.user-menu');
+            const dropdown = document.querySelector('.user-menu .dropdown');
+            if (!userMenu.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    </script>
+    <script>
+        // Check if 'access_token' is not in local storage
+        if (!localStorage.getItem('access_token')) {
+            // If no access_token, redirect to index.html
+            window.location.href = 'index.html';
+        }
+
+    </script>
+    <script>
+        // Fetch and populate the patient UID in the appointment form
+        window.onload = function () {
+            const token = localStorage.getItem('access_token');
+
+            if (token) {
+                // Optionally, you can parse the token to get the UID (if stored inside the token)
+                // For simplicity, assuming the token is just the UID in this example.
+                document.getElementById('patientUid').value = token;  // Replace with decoded UID if necessary
+                console.log(patientUid);
+            }
+            console.log(patientUid);
+        };
+    </script>
+</body>
+
+</html>

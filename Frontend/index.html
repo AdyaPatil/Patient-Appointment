@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (window.location.pathname === '/index.html') {
+      window.location.replace('/');
+    }
+  </script>
+  
+<style>
+    html {
+            scroll-behavior: smooth;
+        }
+</style>
+</head>
+<body id="home">
+<!-- Header Start -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#"><span class="text-primary fw-bold">Hospital</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home" >Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#About" >About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#Service" >Service</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#Contact" >Contact</a></li>
+                </ul>
+                
+                <button class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#authModal">Sign In</button>
+            </div>
+        </div>
+</nav>
+<!-- Header Stop -->
+    
+<!-- Sign In/Sign Up Modal Start -->
+<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authModalLabel">Sign In / Sign Up</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Sign In / Sign Up Tabs -->
+                    <ul class="nav nav-tabs" id="authTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="signin-tab" data-bs-toggle="tab" href="#signin" role="tab" aria-controls="signin" aria-selected="true">Sign In</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="signup-tab" data-bs-toggle="tab" href="#signup" role="tab" aria-controls="signup" aria-selected="false">Sign Up</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3" id="authTabContent">
+                        <!-- Sign In Form -->
+                        <div class="tab-pane fade show active" id="signin" role="tabpanel" aria-labelledby="signin-tab">
+                            <form method="post" id="login-form">
+                                <div class="mb-3">
+                                    <label for="UID" class="form-label">Mobile No</label>
+                                    <input type="text" class="form-control" id="signin-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="signin-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="signin-password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                            </form>
+                        </div>
+                        <!-- Sign Up Form -->
+                        <div class="tab-pane fade" id="signup" role="tabpanel" aria-labelledby="signup-tab">
+                            <form id="signup-form" method="post">
+                                <div class="row mb-3">
+                                    <div class="col-md-6 mb-2">
+                                        <label for="first-name" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="first-name" name="firstname" required>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="middle-name" class="form-label">Middle Name</label>
+                                        <input type="text" class="form-control" id="middle-name" name="middlename" required>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="last-name" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="last-name" name="lastname" required>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="gender" class="form-label">Gender</label>
+                                        <select class="form-control" id="gender" name="gender" required>
+                                            <option value="" disabled selected>Select Gender</option>
+                                            <option value="MALE">MALE</option>
+                                            <option value="FEMALE">FEMALE</option>
+                                            <option value="other">OTHER</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="mobile" class="form-label">Mobile No</label>
+                                        <input type="text" class="form-control" id="mobile" name="mobile_number" required>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="address" class="form-label">Address</label>
+                                        <textarea name="address" id="address" class="form-control" required></textarea>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="dob" class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" id="dob" name="date_of_birth" required>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="age" class="form-label">Age</label>
+                                        <input type="number" class="form-control" id="age" name="age" required readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="password" name="password" required>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="confirm-password" class="form-label">Confirm Password</label>
+                                        <input type="password" class="form-control" id="confirm-password" required>
+                                        <div id="password-message" style="margin-top: 5px;"></div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                            </form>
+                               
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+<!-- Sign In/Sign Up Modal Stop -->
+    
+<!-- Hero Section Placeholder Start -->
+<div id="hero-placeholder"></div>
+<!-- Hero Section Placeholder Stop-->
+
+<!-- Features Section Placeholder Start -->
+<div id="features-placeholder"></div>
+<!-- Features Section Placeholder Stop -->
+
+<!-- About Us Section Placeholder Start -->
+<div id="aboutus-placeholder"></div>
+<!-- About Us Section Placeholder Stop -->
+
+<!-- Service Section Placeholder Start -->
+<div id="service-placeholder"></div>
+<!-- Service Section Placeholder Stop -->
+
+<!-- Staff Section Placeholder Start -->
+<div id="staff-placeholder"></div>
+<!-- Staff Section Placeholder Stop -->
+
+<!-- Footer Placeholder Start-->
+<div id="footer-placeholder"></div>
+<!-- Footer Placeholder Stop-->
+
+<!-- JavaScript to Load Sections Start -->
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Load hero.html
+            fetch('hero.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('hero-placeholder').innerHTML = data;
+                })
+                .catch(error => console.error('Error loading Hero section:', error));
+
+            // Load aboutus.html
+            fetch('/aboutus.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('aboutus-placeholder').innerHTML = data;
+                })
+                .catch(error => console.error('Error loading About Us section:', error));
+
+            // Load feature.html
+            fetch('/feature.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('features-placeholder').innerHTML = data;
+                })
+                .catch(error => console.error('Error loading Features section:', error));
+
+            // Load service.html
+            fetch('/service.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('service-placeholder').innerHTML = data;
+                })
+                .catch(error => console.error('Error loading Service section:', error));
+
+            // Load staff.html
+            fetch('/staff.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('staff-placeholder').innerHTML = data;
+                })
+                .catch(error => console.error('Error loading Service section:', error));
+
+            // Load footer.html
+            fetch('/footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-placeholder').innerHTML = data;
+                })
+                .catch(error => console.error('Error loading Footer section:', error));
+        });
+
+</script>
+<!-- JavaScript to Load Sections Stop -->
+
+<!-- Doctor Authentication Modal Start -->
+<div class="modal fade" id="doctorAuthModal" tabindex="-1" aria-labelledby="doctorAuthModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="doctorAuthModalLabel">Doctor Sign In / Sign Up</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Doctor Sign In / Sign Up Tabs -->
+          <ul class="nav nav-tabs" id="doctorAuthTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a class="nav-link active" id="doctor-signin-tab" data-bs-toggle="tab" href="#doctor-signin" role="tab" aria-controls="doctor-signin" aria-selected="true">Doctor Sign In</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="doctor-signup-tab" data-bs-toggle="tab" href="#doctor-signup" role="tab" aria-controls="doctor-signup" aria-selected="false">Doctor Sign Up</a>
+            </li>
+          </ul>
+  
+          <div class="tab-content mt-3" id="doctorAuthTabContent">
+            <!-- Doctor Sign In Form -->
+            <div class="tab-pane fade show active" id="doctor-signin" role="tabpanel" aria-labelledby="doctor-signin-tab">
+              <form id="doctor-login-form" method="post">
+                <div class="mb-3">
+                  <label for="mobile" class="form-label">Mobile No</label>
+                  <input type="text" class="form-control" id="mobileno" required>
+                </div>
+                <div class="mb-3">
+                  <label for="doctor-password" class="form-label">Password</label>
+                  <input type="password" class="form-control" id="doctor-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Sign In</button>
+              </form>
+            </div>
+  
+            <!-- Doctor Sign Up Form -->
+            <div class="tab-pane fade" id="doctor-signup" role="tabpanel" aria-labelledby="doctor-signup-tab">
+              <form id="doctor-signup-form" method="post">
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-2">
+                    <label for="doctor-firstname" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="doctor-firstname" required>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <label for="doctor-lastname" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="doctor-lastname" required>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <label for="doctor-specialty" class="form-label">Specialty</label>
+                    <input type="text" class="form-control" id="doctor-specialty" required>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <label for="doctor-gender" class="form-label">Gender</label>
+                    <select class="form-control" id="doctor-gender" required>
+                      <option value="" disabled selected>Select Gender</option>
+                      <option value="MALE">MALE</option>
+                      <option value="FEMALE">FEMALE</option>
+                      <option value="OTHER">OTHER</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <label for="doctor-mobile" class="form-label">Mobile Number</label>
+                    <input type="text" class="form-control" id="doctor-mobile" required>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="passworddoctor" required>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <label for="doctor-confirm-password" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="doctor-confirm-password" required>
+                    <div id="password-message" style="margin-top: 5px;"></div>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+<!-- Doctor Authentication Modal Close -->
+  
+
+
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script> 
+
+<!-- Hero image auto slide and arrow slide -->
+<script>
+        // List of images for the hero section
+        const heroImages = [
+          'asset/hero1.jpg',
+          'asset/hero2.jpeg',
+          'asset/hero3.jpg',
+        ];
+      
+        let currentIndex = 0;
+      
+        // Function to change the hero image (both auto and manual)
+        function changeHeroImage(direction) {
+          if (direction === 'left') {
+            currentIndex = (currentIndex - 1 + heroImages.length) % heroImages.length;
+          } else if (direction === 'right') {
+            currentIndex = (currentIndex + 1) % heroImages.length;
+          }
+      
+          const heroSection = document.getElementById('hero-section');
+          heroSection.style.backgroundImage = `url('${heroImages[currentIndex]}')`;
+        }
+      
+        // Auto-slide every 5 seconds
+        setInterval(() => {
+          changeHeroImage('right');
+        }, 5000);
+</script>
+
+<!-- Hover effect on mouse over -->
+<script>
+    // Function to check if an element is in view
+    function isElementInView(el) {
+        const rect = el.getBoundingClientRect();
+        return rect.top >= 0 && rect.bottom <= window.innerHeight;
+    }
+
+    // Function to add/remove the 'in-view' class based on scroll position
+    function handleScroll() {
+        const sections = document.querySelectorAll('.section');
+        
+        sections.forEach(section => {
+            if (isElementInView(section)) {
+                section.classList.add('in-view');  // Add hover effect when section is in view
+            } else {
+                section.classList.remove('in-view'); // Remove hover effect when section is out of view
+            }
+        });
+    }
+
+    // Detect scroll event
+    window.addEventListener('scroll', handleScroll);
+
+    // Call once on page load to check if sections are already in view
+    handleScroll();
+</script>
+
+<!-- Modal popup active hide confirmation -->
+<script>
+// Get Elements
+const openModalBtn = document.getElementById('openModalBtn');
+const authModal = document.getElementById('authModal');
+const closeModal = document.querySelector('.close');
+const showSignUp = document.getElementById('showSignUp');
+const showLogin = document.getElementById('showLogin');
+const formContainer = document.querySelector('.form-container');
+const loginForm = document.getElementById('loginForm');
+const signUpForm = document.getElementById('signUpForm');
+
+// Open Modal
+openModalBtn.addEventListener('click', () => {
+  authModal.style.display = 'block'; // Show the modal
+  // Reset to login form
+  formContainer.classList.remove('slide-signup');
+  loginForm.classList.add('active');
+  signUpForm.classList.remove('active');
+});
+
+// Close Modal (when close button is clicked)
+closeModal.addEventListener('click', () => {
+  authModal.style.display = 'none';
+});
+
+// Close Modal (when clicking outside the modal content)
+window.addEventListener('click', (e) => {
+  if (e.target === authModal) {
+    authModal.style.display = 'none';
+  }
+});
+
+// Show Sign Up Form
+showSignUp.addEventListener('click', (e) => {
+  e.preventDefault();
+  formContainer.classList.add('slide-signup');
+  loginForm.classList.remove('active');
+  signUpForm.classList.add('active');
+});
+
+// Show Login Form
+showLogin.addEventListener('click', (e) => {
+  e.preventDefault();
+  formContainer.classList.remove('slide-signup');
+  signUpForm.classList.remove('active');
+  loginForm.classList.add('active');
+});
+</script>
+
+<!-- Calculate age automatically -->
+<script>
+     // Function to calculate age
+     function calculateAge() {
+        var dob = document.getElementById('dob').value;
+        if (dob) {
+            var birthDate = new Date(dob);
+            var today = new Date();
+            var age = today.getFullYear() - birthDate.getFullYear();
+            var month = today.getMonth() - birthDate.getMonth();
+
+            // Adjust if the birth date hasn't occurred yet this year
+            if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+
+            // Set the calculated age in the age input field
+            document.getElementById('age').value = age;
+        }
+    }
+
+    // Add event listener to update the age when the date of birth changes
+    document.getElementById('dob').addEventListener('change', calculateAge);
+</script>
+
+<!-- Validation for password and confirm password -->
+<script>
+    // Function to check if passwords match
+    function checkPasswords() {
+        var password = document.getElementById('password').value;
+        var confirmPassword = document.getElementById('confirm-password').value;
+        var messageDiv = document.getElementById('password-message');
+
+        if (confirmPassword !== '') {
+            if (password === confirmPassword) {
+                messageDiv.textContent = 'Password Matched';
+                messageDiv.style.color = 'green';
+                return true; // Passwords match
+            } else {
+                messageDiv.textContent = 'Password Not Match';
+                messageDiv.style.color = 'red';
+                return false; // Passwords do not match
+            }
+        } else {
+            messageDiv.textContent = '';
+            return false; // No confirmation password entered
+        }
+    }
+
+    // Add event listener to the confirm password field
+    document.getElementById('confirm-password').addEventListener('input', checkPasswords);
+</script>
+
+<!-- Form validation for doctor Registration -->
+<script>
+    // doctorAuth.js
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Handle the age calculation based on DOB input
+  const dobInput = document.getElementById('doctor-dob');
+  const ageInput = document.getElementById('doctor-age');
+
+  dobInput.addEventListener('change', function () {
+    const dob = new Date(dobInput.value);
+    const today = new Date();
+    const age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    ageInput.value = age;
+  });
+
+  // Password match validation for Sign Up
+  const passwordInput = document.getElementById('password');
+  const confirmPasswordInput = document.getElementById('doctor-confirm-password');
+  const passwordMessage = document.getElementById('password-message');
+
+  confirmPasswordInput.addEventListener('input', function () {
+    if (confirmPasswordInput.value !== passwordInput.value) {
+      passwordMessage.textContent = "Passwords do not match!";
+      passwordMessage.style.color = 'red';
+    } else {
+      passwordMessage.textContent = "Passwords match.";
+      passwordMessage.style.color = 'green';
+    }
+  });
+
+  // Form validation for doctor sign-in and sign-up
+  const signinForm = document.querySelector('#doctor-signin form');
+  const signupForm = document.querySelector('#doctor-signup form');
+
+  // Sign In Form Validation
+  signinForm.addEventListener('submit', function (event) {
+    const email = document.getElementById('doctor-email').value;
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+      event.preventDefault(); // Prevent form submission
+      alert('Please fill in all fields');
+    }
+  });
+
+  // Sign Up Form Validation
+  signupForm.addEventListener('submit', function (event) {
+    const firstname = document.getElementById('doctor-firstname').value;
+    const lastname = document.getElementById('doctor-lastname').value;
+    const specialty = document.getElementById('doctor-specialty').value;
+    const mobile = document.getElementById('doctor-mobile').value;
+    const address = document.getElementById('doctor-address').value;
+    const dob = document.getElementById('doctor-dob').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('doctor-confirm-password').value;
+
+    if (!firstname || !lastname || !specialty || !mobile || !address || !dob || !password || !confirmPassword) {
+      event.preventDefault(); // Prevent form submission
+      alert('Please fill in all fields');
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      event.preventDefault(); // Prevent form submission
+      alert('Passwords do not match!');
+    }
+  });
+});
+
+</script>
+
+<!-- Patient Add -->
+<script>
+   document.getElementById('signup-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
+    
+    // Collect form data
+    const formData = new FormData(this); // 'this' refers to the form
+
+    // Convert FormData to a JSON object
+    const formObject = Object.fromEntries(formData.entries()); // Convert FormData to a plain object
+    
+    // Ensure `gender` is uppercase
+    formObject.gender = formObject.gender.toUpperCase();
+    
+    // Log the final JSON object for debugging
+    console.log("Payload to be sent:", formObject);
+
+    // Send the form data as JSON
+    fetch('http://127.0.0.1:8000/patient/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formObject), // Convert the object to JSON
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.status} - ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+        alert('Patient data submitted successfully!' + data.patient_uid);
+        window.location.href = '#signin'; 
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('An error occurred while submitting the data. Please try again later.');
+    });
+});
+
+</script>
+
+<!-- Patient Login Check -->
+<script>
+document.getElementById('login-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent form submission
+
+    const uid = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+
+    const loginData = {
+        mobile: uid,
+        password: password
+    };
+
+    // Send login data to the FastAPI backend using fetch
+    fetch('http://127.0.0.1:8000/Patient/login/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData),
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json(); // Parse JSON if response is OK
+        } else {
+            throw new Error('Login failed');
+        }
+    })
+    .then(data => {
+        // Check if we have the access_token in the response
+        if (data.access_token) {
+            console.log('Login successful:', data);
+
+            // Store the access token (e.g., in localStorage or sessionStorage)
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('patient_uid',data.patient_uid);
+
+            
+            // Optionally, redirect to the dashboard or another page
+            alert('Login successful, Welcome ' + data.patient_name);
+            window.location.href = 'patientdashboard.html';  // Redirect to the dashboard page
+        } else {
+            alert('Login failed: ' + (data.detail || 'Unknown error'));
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('An error occurred: ' + error.message);
+    });
+});
+</script>
+
+<!-- Doctor Login Check -->
+<script>
+  document.getElementById('doctor-login-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent form submission
+
+    const uid = document.getElementById('mobileno').value;  // Assuming uid refers to the doctor's mobile number or identifier
+    const password = document.getElementById('doctor-password').value;
+
+    const loginData = {
+        mobile: uid,
+        password: password
+    };
+
+    // Send login data to the FastAPI backend using fetch
+    fetch('http://127.0.0.1:8000/doctor/login/', {  // Update endpoint for doctor login
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData),
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json(); // Parse JSON if response is OK
+        } else {
+            throw new Error('Login failed');
+        }
+    })
+    .then(data => {
+        // Check if we have the access_token and doctor_firstname in the response
+        if (data.access_token) {
+            console.log('Login successful:', data);
+
+            // Store the access token in localStorage
+            localStorage.setItem('access_token', data.access_token);
+
+            // Extract doctor ID from the access token (JWT)
+            const token = data.access_token;
+            const tokenPayload = JSON.parse(atob(token.split('.')[1])); // Decode the payload
+            const doctorId = tokenPayload.id; // Get doctor ID from the payload
+            localStorage.setItem('doctor_id', doctorId); // Store the doctor ID
+
+            // Fetch the doctor details (e.g., name) using the doctor ID
+            fetchDoctorDetails(doctorId);
+
+            // Optionally, redirect to the doctor dashboard
+            alert('Login successful, Welcome Dr. ' + data.doctor_firstname);
+            window.location.href = 'doctordashboard.html';  // Redirect to the doctor's dashboard page
+        } else {
+            alert('Login failed: Missing required information');
+            console.error('Missing access_token:', data);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('An error occurred: ' + error.message);
+    });
+});
+
+// Fetch doctor details using doctor ID
+function fetchDoctorDetails(doctorId) {
+    const token = localStorage.getItem('access_token');  // Retrieve the stored access token
+
+    fetch(`http://127.0.0.1:8000/doctor/${doctorId}/profile`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,  // Use the access token to authenticate the request
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.doctor_firstname) {
+            // Update the localStorage with the doctor's name
+            localStorage.setItem('doctor_firstname', data.doctor_firstname);
+            console.log('Doctor details fetched:', data);
+        } else {
+            console.error('Doctor details not found:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching doctor details:', error);
+    });
+}
+
+</script>
+  
+    
+
+<!-- Add doctor -->
+<script>
+    document
+      .getElementById("doctor-signup-form")
+      .addEventListener("submit", async function (e) {
+        e.preventDefault(); // Prevent the default form submission behavior
+  
+        // Collect data from form inputs
+        const data = {
+          firstname: document.getElementById("doctor-firstname").value,
+          lastname: document.getElementById("doctor-lastname").value,
+          department: document.getElementById("doctor-specialty").value,
+          mobile: document.getElementById("doctor-mobile").value,
+          password: document.getElementById("passworddoctor").value,
+        };
+  
+        try {
+          // Send the data to the API endpoint
+          const response = await fetch("http://127.0.0.1:8000/doctors/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+  
+          // Handle API response
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+  
+          const result = await response.json(); // Parse JSON response
+          console.log("Response from server:", result);
+          alert("Doctor added successfully! ID: " + result.id); // Update alert message with response ID if available
+        } catch (error) {
+          console.error("Error:", error); // Log errors
+          alert("Failed to add doctor. Please try again."); // Notify user
+        }
+      });
+</script>
+  
+  
+  
+
+
+
+</body>
+</html>
