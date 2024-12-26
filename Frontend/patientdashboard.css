@@ -184,3 +184,88 @@
             max-width: 100%;
         }
     }
+
+
+
+    /* Modal Styling */
+.modal-dialog {
+  max-width: 500px;
+  margin: 30px auto;
+}
+
+.modal-header {
+  background-color: #007bff;
+  color: white;
+  text-align: center;
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  text-align: center;
+  padding: 10px;
+}
+
+.modal-footer .btn {
+  width: 100%;
+  font-size: 1.2rem;
+}
+
+.modal-content {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styling */
+#updateAppointmentForm .form-label {
+  font-weight: bold;
+}
+
+#updateAppointmentForm .form-control {
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  box-shadow: none;
+  font-size: 1rem;
+}
+
+#updateAppointmentForm .form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.25rem rgba(38, 143, 255, 0.5);
+}
+
+#updateAppointmentForm button {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+#updateAppointmentForm button:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Close Button Styling */
+.btn-close {
+  font-size: 1.5rem;
+  color: #000;
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  opacity: 0.8 !important;
+}
+
+/* Additional Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f6f9;
+}

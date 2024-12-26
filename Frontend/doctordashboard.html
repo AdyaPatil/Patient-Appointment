@@ -106,156 +106,291 @@
 
     <!-- Get Appointment Start -->
     <div id="getPatient" class="hidden">
-            <h2>Check Appointments</h2>
-            <p id="appointmentMessage">Loading appointments...</p>
-            <table id="appointmentsTable" class="table table-striped" style="display: none;">
-                <thead>
-                    <tr>
-                        <th>Sr.No</th>
-                        <th>Patient Name</th>
-                        <th>Appointment Date</th>
-                        <th>Appointment Time</th>
-                        <th>Symptoms</th>
-                        <th>Disease</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="appointmentsList"></tbody>
-            </table>
-            <!-- Pagination Controls -->
-            <div id="paginationControls" style="display: none; text-align: center;">
-                <button id="prevPage" class="btn btn-secondary" onclick="goToPage(currentPage - 1)">Previous</button>
-                <span id="pageNumber"></span>
-                <button id="nextPage" class="btn btn-secondary" onclick="goToPage(currentPage + 1)">Next</button>
+        <h2>Check Appointments</h2>
+        <p id="appointmentMessage">Loading appointments...</p>
+        <table id="appointmentsTable" class="table table-striped" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Sr.No</th>
+                    <th>Patient Name</th>
+                    <th>Appointment Date</th>
+                    <th>Appointment Time</th>
+                    <th>Symptoms</th>
+                    <th>Disease</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="appointmentsList"></tbody>
+        </table>
+        <!-- Pagination Controls -->
+        <div id="paginationControls" style="display: none; text-align: center;">
+            <button id="prevPage" class="btn btn-secondary" onclick="goToPage(currentPage - 1)">Previous</button>
+            <span id="pageNumber"></span>
+            <button id="nextPage" class="btn btn-secondary" onclick="goToPage(currentPage + 1)">Next</button>
+        </div>
+    
+        <!-- Popup Modal for Updating Appointment -->
+        <div id="updateAppointmentPopup" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closePopup()">&times;</span>
+                <h2>Update Appointment</h2>
+                <form id="updateAppointmentForm">
+                    <input type="hidden" id="appointmentId">
+                    <label for="patientName">Patient Name:</label>
+                    <input type="text" id="patientName" readonly><br>
+    
+                    <label for="appointmentDate">Date:</label>
+                    <input type="text" id="appointmentDate" readonly><br>
+    
+                    <label for="appointmentTime">Time:</label>
+                    <input type="text" id="appointmentTime" readonly><br>
+    
+                    <label for="symptoms">Symptoms:</label>
+                    <input type="text" id="symptoms" readonly><br>
+
+                    <label for="disease">Disease:</label>
+                    <input type="text" id="disease"><br>
+    
+                    <label for="status">Status:</label>
+                    <input type="text" id="status"><br>
+    
+                    <button type="submit" class="btn btn-success">Update Appointment</button>
+                </form>
             </div>
+        </div>
     </div>
-    <script>
-            let currentPage = 1;
-            const appointmentsPerPage = 10;
+<script>
+    // Function to open the update appointment modal and populate the fields
+function openUpdatePopup(appointment) {
+    document.getElementById('appointmentId').value = appointment.appointment_id;
+    document.getElementById('patientName').value = appointment.patient_name;
+    document.getElementById('appointmentDate').value = appointment.date;
+    document.getElementById('appointmentTime').value = appointment.time;
+    document.getElementById('symptoms').value = appointment.symptoms;
+    document.getElementById('disease').value = appointment.disease;
+    document.getElementById('status').value = appointment.status;
 
-            // Fetch appointments based on doctor ID stored in localStorage
-            async function fetchAppointments() {
-                const doctorRegno = localStorage.getItem('doctor_id'); // Assuming doctor ID is stored in localStorage
-                if (!doctorRegno) {
-                    console.log('Doctor ID not found in localStorage');
-                    return;
-                }
+    document.getElementById('updateAppointmentPopup').style.display = 'block';
+}
 
-                const token = localStorage.getItem('access_token');  // Assuming you stored the access token in localStorage
-                const url = `http://127.0.0.1:8000/doctors/${doctorRegno}/patients/with-appointments`;
+// Function to close the update appointment popup
+function closePopup() {
+    document.getElementById('updateAppointmentPopup').style.display = 'none';
+}
 
-                try {
-                    const response = await fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,  // Attach the token for authorization
-                        },
-                    });
+// Event listener for form submission to send the data to the API
+document.getElementById('updateAppointmentForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
 
+    const appointmentId = document.getElementById('appointmentId').value;
+    const disease = document.getElementById('disease').value;
+    const status = document.getElementById('status').value;
 
+    // Construct the data object for updates
+    const updatedData = {};
+    if (disease !== "") updatedData.disease = disease;  // Only add if there's a new value
+    if (status !== "") updatedData.status = status;    // Only add if there's a new value
 
+    // Get the doctor ID from localStorage
+    const doctorRegno = localStorage.getItem('doctor_id');
+    const token = localStorage.getItem('access_token');
 
-                    const data = await response.json();
-                    const patientsWithAppointments = data;
-                    const appointmentsList = document.getElementById('appointmentsList');
-                    const appointmentMessage = document.getElementById('appointmentMessage');
-                    const appointmentsTable = document.getElementById('appointmentsTable');
+    if (!doctorRegno || !token) {
+        console.error('Doctor ID or token not found');
+        return;
+    }
 
-                    if (patientsWithAppointments.length === 0) {
-                        appointmentMessage.textContent = 'No patients with appointments found.';
-                        appointmentsTable.style.display = 'none';
-                    } else {
-                        appointmentMessage.textContent = '';
-                        appointmentsTable.style.display = 'table';
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/doctor/${doctorRegno}/appointment/${appointmentId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(updatedData),
+        });
 
-                        // Flatten appointments and paginate them (show 10 at a time)
-                        const allAppointments = patientsWithAppointments.flatMap(patient => {
-                            return patient.appointments.map(appointment => ({
-                                patient_name: patient.patient_name,
-                                appointment_id: appointment.appointment_id,
-                                date: appointment.date,
-                                time: appointment.time,
-                                symptoms: appointment.symptoms,
-                                disease: patient.patient_disease,
-                                status: appointment.status,
-                                is_deleted: appointment.is_deleted
-                            }));
-                        });
+        if (response.ok) {
+            alert('Appointment updated successfully');
+            closePopup();
+            fetchAppointments(); // Optionally reload the appointments
+        } else {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.detail}`);
+        }
+    } catch (error) {
+        console.error('Error updating appointment:', error);
+        alert('Error updating appointment.');
+    }
+});
 
-                        const startIndex = (currentPage - 1) * appointmentsPerPage;
-                        const endIndex = startIndex + appointmentsPerPage;
-                        const paginatedAppointments = allAppointments.slice(startIndex, endIndex);
+</script>
+        
+    
+   <script>
+    let currentPage = 1;
+const appointmentsPerPage = 10;
 
-                        // Clear the existing table rows
-                        appointmentsList.innerHTML = '';
+// Fetch appointments based on doctor ID stored in localStorage
+async function fetchAppointments() {
+    const doctorRegno = localStorage.getItem('doctor_id'); // Assuming doctor ID is stored in localStorage
+    if (!doctorRegno) {
+        console.log('Doctor ID not found in localStorage');
+        return;
+    }
 
-                        // Loop through the appointments and add rows to the table
-                        paginatedAppointments.forEach((appointment, index) => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${startIndex + index + 1}</td> <!-- Row number -->
-                                <td>${appointment.patient_name}</td>
-                                <td>${appointment.date}</td>
-                                <td>${appointment.time}</td>
-                                <td>${appointment.symptoms}</td>
-                                <td>${appointment.disease}</td>
-                                <td>${appointment.status}</td>
-                                <td>${appointment.is_deleted ?
-                                    '' :
-                                    `<button class="btn btn-warning" onclick="updateAppointment(${appointment.appointment_id})">Update</button>`
-                                }
-                                    </td>
+    const token = localStorage.getItem('access_token');  // Assuming you stored the access token in localStorage
+    const url = `http://127.0.0.1:8000/doctors/${doctorRegno}/patients/with-appointments`;
 
-                            `;
-                            appointmentsList.appendChild(row);
-                        });
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,  // Attach the token for authorization
+            },
+        });
 
-                        // Show pagination controls if more than 10 appointments
-                        if (allAppointments.length > appointmentsPerPage) {
-                            document.getElementById('paginationControls').style.display = 'block';
-                            updatePaginationControls(allAppointments.length);
-                        } else {
-                            document.getElementById('paginationControls').style.display = 'none';
-                        }
+        const data = await response.json();
+        const patientsWithAppointments = data;
+        const appointmentsList = document.getElementById('appointmentsList');
+        const appointmentMessage = document.getElementById('appointmentMessage');
+        const appointmentsTable = document.getElementById('appointmentsTable');
+
+        if (patientsWithAppointments.length === 0) {
+            appointmentMessage.textContent = 'No patients with appointments found.';
+            appointmentsTable.style.display = 'none';
+        } else {
+            appointmentMessage.textContent = '';
+            appointmentsTable.style.display = 'table';
+
+            // Flatten appointments and paginate them (show 10 at a time)
+            const allAppointments = patientsWithAppointments.flatMap(patient => {
+                return patient.appointments.map(appointment => ({
+                    patient_name: patient.patient_name,
+                    appointment_id: appointment.appointment_id,
+                    date: appointment.date.slice(0, 10),  // Slice the date to remove the time part
+                    time: appointment.time,
+                    symptoms: appointment.symptoms,
+                    disease: patient.patient_disease,
+                    status: appointment.status,
+                    is_deleted: appointment.is_deleted
+                }));
+            });
+
+            const startIndex = (currentPage - 1) * appointmentsPerPage;
+            const endIndex = startIndex + appointmentsPerPage;
+            const paginatedAppointments = allAppointments.slice(startIndex, endIndex);
+
+            // Clear the existing table rows
+            appointmentsList.innerHTML = '';
+
+            // Loop through the appointments and add rows to the table
+            paginatedAppointments.forEach((appointment, index) => {
+                const row = document.createElement('tr');
+                row.classList.add('clickable-row');
+                row.setAttribute('data-appointment-id', appointment.appointment_id); // Add data attribute
+                row.innerHTML = `
+                    <td>${startIndex + index + 1}</td> <!-- Row number -->
+                    <td>${appointment.patient_name}</td>
+                    <td>${appointment.date}</td> <!-- Display the formatted date -->
+                    <td>${appointment.time}</td>
+                    <td>${appointment.symptoms}</td>
+                    <td>${appointment.disease}</td>
+                    <td>${appointment.status}</td>
+                    <td>${appointment.is_deleted ?
+                        '' :
+                        `<button class="btn btn-warning">Update</button>`
                     }
-                } catch (error) {
-                    console.error('Error fetching appointments:', error);
-                    document.getElementById('appointmentMessage').textContent = 'Error fetching appointments.';
-                }
+                    </td>
+                `;
+                // Add event listener to the row to trigger the update
+                row.addEventListener('click', function() {
+                    updateAppointment(appointment.appointment_id);
+                });
+                appointmentsList.appendChild(row);
+            });
+
+            // Show pagination controls if more than 10 appointments
+            if (allAppointments.length > appointmentsPerPage) {
+                document.getElementById('paginationControls').style.display = 'block';
+                updatePaginationControls(allAppointments.length);
+            } else {
+                document.getElementById('paginationControls').style.display = 'none';
             }
+        }
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+        document.getElementById('appointmentMessage').textContent = 'Error fetching appointments.';
+    }
+}
 
-            // Update the pagination controls
-            function updatePaginationControls(totalAppointments) {
-                const totalPages = Math.ceil(totalAppointments / appointmentsPerPage);
-                const prevBtn = document.getElementById('prevPage');
-                const nextBtn = document.getElementById('nextPage');
-                const pageNum = document.getElementById('pageNumber');
+// Update the pagination controls
+function updatePaginationControls(totalAppointments) {
+    const totalPages = Math.ceil(totalAppointments / appointmentsPerPage);
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
+    const pageNum = document.getElementById('pageNumber');
 
-                pageNum.textContent = `Page ${currentPage} of ${totalPages}`;
+    pageNum.textContent = `Page ${currentPage} of ${totalPages}`;
 
-                // Enable/disable prev and next buttons based on the current page
-                prevBtn.disabled = currentPage === 1;
-                nextBtn.disabled = currentPage === totalPages;
-            }
+    // Enable/disable prev and next buttons based on the current page
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+}
 
-            // Handle pagination actions
-            function goToPage(pageNumber) {
-                currentPage = pageNumber;
-                fetchAppointments();
-            }
+// Handle pagination actions
+function goToPage(pageNumber) {
+    currentPage = pageNumber;
+    fetchAppointments();
+}
 
-            // Example function for canceling an appointment
-            function cancelAppointment(appointmentId) {
-                // Add your cancel appointment logic here (e.g., make an API call to cancel the appointment)
-                console.log('Cancel appointment with ID:', appointmentId);
-            }
+// Open the update appointment form in a popup
+async function updateAppointment(appointmentId) {
+    const doctorRegno = localStorage.getItem('doctor_id');
+    const token = localStorage.getItem('access_token');
+    const url = `http://127.0.0.1:8000/doctor/${doctorRegno}/appointment/${appointmentId}`;
 
-            // Call the fetchAppointments function when the page loads
-            window.onload = () => {
-                fetchAppointments();
-            };
-    </script>
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        const data = await response.json();
+        const appointment = data.appointment;
+        const patient = appointment.patient_info;
+
+        // Populate the form with the appointment data
+        document.getElementById('appointmentId').value = appointment.appointment_id;
+        document.getElementById('patientName').value = patient.patient_name;
+        document.getElementById('appointmentDate').value = appointment.date;
+        document.getElementById('appointmentTime').value = appointment.time; // Assuming time is part of date_time
+        document.getElementById('symptoms').value = appointment.appointment_symptoms;
+        document.getElementById('status').value = appointment.is_deleted ? 'Cancelled' : 'Active';
+
+        // Show the popup form
+        document.getElementById('updateAppointmentPopup').style.display = 'block';
+    } catch (error) {
+        console.error('Error fetching appointment:', error);
+    }
+}
+
+// Close the popup form
+function closePopup() {
+    document.getElementById('updateAppointmentPopup').style.display = 'none';
+}
+
+// Call the fetchAppointments function when the page loads
+window.onload = () => {
+    fetchAppointments();
+};
+
+   </script>
+    
+    
     <!-- Get Appointment Stop -->
 
 

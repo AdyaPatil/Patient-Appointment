@@ -173,7 +173,7 @@
                 .catch(error => console.error('Error loading Hero section:', error));
 
             // Load aboutus.html
-            fetch('/aboutus.html')
+            fetch('aboutus.html')
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('aboutus-placeholder').innerHTML = data;
@@ -181,7 +181,7 @@
                 .catch(error => console.error('Error loading About Us section:', error));
 
             // Load feature.html
-            fetch('/feature.html')
+            fetch('feature.html')
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('features-placeholder').innerHTML = data;
@@ -189,7 +189,7 @@
                 .catch(error => console.error('Error loading Features section:', error));
 
             // Load service.html
-            fetch('/service.html')
+            fetch('service.html')
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('service-placeholder').innerHTML = data;
@@ -197,7 +197,7 @@
                 .catch(error => console.error('Error loading Service section:', error));
 
             // Load staff.html
-            fetch('/staff.html')
+            fetch('staff.html')
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('staff-placeholder').innerHTML = data;
@@ -205,7 +205,7 @@
                 .catch(error => console.error('Error loading Service section:', error));
 
             // Load footer.html
-            fetch('/footer.html')
+            fetch('footer.html')
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('footer-placeholder').innerHTML = data;

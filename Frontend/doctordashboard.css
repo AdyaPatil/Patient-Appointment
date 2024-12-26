@@ -184,3 +184,91 @@
           max-width: 100%;
       }
   }
+
+  /* Modal Styles */
+#updateAppointmentPopup {
+  display: none;  /* Hidden by default */
+  position: fixed;  /* Fixed position for the modal */
+  z-index: 1;  /* Ensure the modal is above other content */
+  left: 0;
+  top: 0;
+  width: 100%;  /* Full width */
+  height: 100%;  /* Full height */
+  background-color: rgba(0, 0, 0, 0.5);  /* Semi-transparent background */
+  padding-top: 60px;  /* Adjust space from the top */
+}
+
+/* Modal Content Styles */
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;  /* You can adjust the width as needed */
+  max-width: 500px;  /* Maximum width */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Add some shadow */
+  border-radius: 10px;
+}
+
+/* Close Button Styles */
+.close {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Form Styling */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Input Fields */
+input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Button Styling */
+button[type="submit"] {
+  padding: 10px 15px;
+  background-color: #28a745;  /* Green color */
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #218838;  /* Darker green */
+}
+
+/* Label Styling */
+label {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 600px) {
+  .modal-content {
+      width: 90%;  /* Reduce the width for smaller screens */
+  }
+}
