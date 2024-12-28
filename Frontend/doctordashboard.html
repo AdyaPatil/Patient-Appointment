@@ -48,25 +48,25 @@
             // Fetch doctor profile details after the DOM is fully loaded
             fetchDoctorProfile();
         });
-    
+
         // Fetch doctor profile details
         function fetchDoctorProfile() {
             // Get the doctor ID from localStorage (ensure it is set during login)
             const doctorId = localStorage.getItem('doctor_id');  // Assuming doctor ID is stored in localStorage
             const token = localStorage.getItem('access_token');  // Assuming token is saved in localStorage
-    
+
             if (!token) {
                 console.error('No token found!');
                 return;
             }
-    
+
             if (!doctorId) {
                 console.error('No doctor ID found!');
                 return;
             }
-    
+
             const url = `http://127.0.0.1:8000/doctor/${doctorId}/profile`; // Your API endpoint
-    
+
             fetch(url, {
                 method: 'GET',
                 headers: {
@@ -78,7 +78,7 @@
                     // console.log('Data received from API:', data); // Log the data received
                     if (data.doctor_profile) {
                         const doctor = data.doctor_profile;
-    
+
                         // Update the user menu with doctor's name
                         const nameElement = document.getElementById('name');
                         if (nameElement) {
@@ -87,7 +87,7 @@
                         } else {
                             console.error('Element with ID "name" not found.');
                         }
-    
+
                         // Optionally, update the profile image if available
                         document.getElementById('user-image').src = doctor.profile_image || "https://via.placeholder.com/40";
                     } else {
@@ -104,329 +104,151 @@
     <!-- Main Content -->
     <div class="main">
 
-    <!-- Get Appointment Start -->
-    <div id="getPatient" class="hidden">
-        <h2>Check Appointments</h2>
-        <p id="appointmentMessage">Loading appointments...</p>
-        <table id="appointmentsTable" class="table table-striped" style="display: none;">
-            <thead>
-                <tr>
-                    <th>Sr.No</th>
-                    <th>Patient Name</th>
-                    <th>Appointment Date</th>
-                    <th>Appointment Time</th>
-                    <th>Symptoms</th>
-                    <th>Disease</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="appointmentsList"></tbody>
-        </table>
-        <!-- Pagination Controls -->
-        <div id="paginationControls" style="display: none; text-align: center;">
-            <button id="prevPage" class="btn btn-secondary" onclick="goToPage(currentPage - 1)">Previous</button>
-            <span id="pageNumber"></span>
-            <button id="nextPage" class="btn btn-secondary" onclick="goToPage(currentPage + 1)">Next</button>
-        </div>
-    
-        <!-- Popup Modal for Updating Appointment -->
-        <div id="updateAppointmentPopup" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close" onclick="closePopup()">&times;</span>
-                <h2>Update Appointment</h2>
-                <form id="updateAppointmentForm">
-                    <input type="hidden" id="appointmentId">
-                    <label for="patientName">Patient Name:</label>
-                    <input type="text" id="patientName" readonly><br>
-    
-                    <label for="appointmentDate">Date:</label>
-                    <input type="text" id="appointmentDate" readonly><br>
-    
-                    <label for="appointmentTime">Time:</label>
-                    <input type="text" id="appointmentTime" readonly><br>
-    
-                    <label for="symptoms">Symptoms:</label>
-                    <input type="text" id="symptoms" readonly><br>
+        <!-- Get Appointment Start -->
+        <div id="getPatient" class="hidden">
+            <h2>Check Appointments</h2>
+            <p id="appointmentMessage">Loading appointments...</p>
+            <table id="appointmentsTable" class="table table-striped" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Patient Name</th>
+                        <th>Appointment Date</th>
+                        <th>Appointment Time</th>
+                        <th>Symptoms</th>
+                        <th>Disease</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentsList"></tbody>
+            </table>
+            <!-- Pagination Controls -->
+            <div id="paginationControls" style="display: none; text-align: center;">
+                <button id="prevPage" class="btn btn-secondary" onclick="goToPage(currentPage - 1)">Previous</button>
+                <span id="pageNumber"></span>
+                <button id="nextPage" class="btn btn-secondary" onclick="goToPage(currentPage + 1)">Next</button>
+            </div>
 
-                    <label for="disease">Disease:</label>
-                    <input type="text" id="disease"><br>
-    
-                    <label for="status">Status:</label>
-                    <input type="text" id="status"><br>
-    
-                    <button type="submit" class="btn btn-success">Update Appointment</button>
-                </form>
+            <!-- Popup Modal for Updating Appointment -->
+            <div id="updateAppointmentPopup" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closePopup()">&times;</span>
+                    <h2>Update Appointment</h2>
+                    <form id="updateAppointmentForm">
+                        <input type="hidden" id="appointmentId">
+                        <label for="patientName">Patient Name:</label>
+                        <input type="text" id="patientName" readonly><br>
+
+                        <label for="appointmentDate">Date:</label>
+                        <input type="text" id="appointmentDate" readonly><br>
+
+                        <label for="appointmentTime">Time:</label>
+                        <input type="text" id="appointmentTime" readonly><br>
+
+                        <label for="symptoms">Symptoms:</label>
+                        <input type="text" id="symptoms" readonly><br>
+
+                        <label for="disease">Disease:</label>
+                        <input type="text" id="disease"><br>
+
+                        <label for="status">Status:</label>
+                        <select id="status" name="status">
+                            <option value="PENDING">PENDING</option>
+                            <option value="CHECKED">CHECKED</option>
+                        </select><br>
+
+
+                        <button type="submit" class="btn btn-success">Update Appointment</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-<script>
-    // Function to open the update appointment modal and populate the fields
-function openUpdatePopup(appointment) {
-    document.getElementById('appointmentId').value = appointment.appointment_id;
-    document.getElementById('patientName').value = appointment.patient_name;
-    document.getElementById('appointmentDate').value = appointment.date;
-    document.getElementById('appointmentTime').value = appointment.time;
-    document.getElementById('symptoms').value = appointment.symptoms;
-    document.getElementById('disease').value = appointment.disease;
-    document.getElementById('status').value = appointment.status;
+        <!-- Update Appointment By Id Start -->
+        <script>
+            // Function to open the update appointment modal and populate the fields
+            function openUpdatePopup(appointment) {
+                document.getElementById('appointmentId').value = appointment.appointment_id;
+                document.getElementById('patientName').value = appointment.patient_name;
+                document.getElementById('appointmentDate').value = appointment.date;
+                document.getElementById('appointmentTime').value = appointment.time;
+                document.getElementById('symptoms').value = appointment.symptoms;
+                document.getElementById('disease').value = appointment.disease;
+                document.getElementById('status').value = appointment.status;
 
-    document.getElementById('updateAppointmentPopup').style.display = 'block';
-}
-
-// Function to close the update appointment popup
-function closePopup() {
-    document.getElementById('updateAppointmentPopup').style.display = 'none';
-}
-
-// Event listener for form submission to send the data to the API
-document.getElementById('updateAppointmentForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
-
-    const appointmentId = document.getElementById('appointmentId').value;
-    const disease = document.getElementById('disease').value;
-    const status = document.getElementById('status').value;
-
-    // Construct the data object for updates
-    const updatedData = {};
-    if (disease !== "") updatedData.disease = disease;  // Only add if there's a new value
-    if (status !== "") updatedData.status = status;    // Only add if there's a new value
-
-    // Get the doctor ID from localStorage
-    const doctorRegno = localStorage.getItem('doctor_id');
-    const token = localStorage.getItem('access_token');
-
-    if (!doctorRegno || !token) {
-        console.error('Doctor ID or token not found');
-        return;
-    }
-
-    try {
-        const response = await fetch(`http://127.0.0.1:8000/doctor/${doctorRegno}/appointment/${appointmentId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify(updatedData),
-        });
-
-        if (response.ok) {
-            alert('Appointment updated successfully');
-            closePopup();
-            fetchAppointments(); // Optionally reload the appointments
-        } else {
-            const errorData = await response.json();
-            alert(`Error: ${errorData.detail}`);
-        }
-    } catch (error) {
-        console.error('Error updating appointment:', error);
-        alert('Error updating appointment.');
-    }
-});
-
-</script>
-        
-    
-   <script>
-    let currentPage = 1;
-const appointmentsPerPage = 10;
-
-// Fetch appointments based on doctor ID stored in localStorage
-async function fetchAppointments() {
-    const doctorRegno = localStorage.getItem('doctor_id'); // Assuming doctor ID is stored in localStorage
-    if (!doctorRegno) {
-        console.log('Doctor ID not found in localStorage');
-        return;
-    }
-
-    const token = localStorage.getItem('access_token');  // Assuming you stored the access token in localStorage
-    const url = `http://127.0.0.1:8000/doctors/${doctorRegno}/patients/with-appointments`;
-
-    try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,  // Attach the token for authorization
-            },
-        });
-
-        const data = await response.json();
-        const patientsWithAppointments = data;
-        const appointmentsList = document.getElementById('appointmentsList');
-        const appointmentMessage = document.getElementById('appointmentMessage');
-        const appointmentsTable = document.getElementById('appointmentsTable');
-
-        if (patientsWithAppointments.length === 0) {
-            appointmentMessage.textContent = 'No patients with appointments found.';
-            appointmentsTable.style.display = 'none';
-        } else {
-            appointmentMessage.textContent = '';
-            appointmentsTable.style.display = 'table';
-
-            // Flatten appointments and paginate them (show 10 at a time)
-            const allAppointments = patientsWithAppointments.flatMap(patient => {
-                return patient.appointments.map(appointment => ({
-                    patient_name: patient.patient_name,
-                    appointment_id: appointment.appointment_id,
-                    date: appointment.date.slice(0, 10),  // Slice the date to remove the time part
-                    time: appointment.time,
-                    symptoms: appointment.symptoms,
-                    disease: patient.patient_disease,
-                    status: appointment.status,
-                    is_deleted: appointment.is_deleted
-                }));
-            });
-
-            const startIndex = (currentPage - 1) * appointmentsPerPage;
-            const endIndex = startIndex + appointmentsPerPage;
-            const paginatedAppointments = allAppointments.slice(startIndex, endIndex);
-
-            // Clear the existing table rows
-            appointmentsList.innerHTML = '';
-
-            // Loop through the appointments and add rows to the table
-            paginatedAppointments.forEach((appointment, index) => {
-                const row = document.createElement('tr');
-                row.classList.add('clickable-row');
-                row.setAttribute('data-appointment-id', appointment.appointment_id); // Add data attribute
-                row.innerHTML = `
-                    <td>${startIndex + index + 1}</td> <!-- Row number -->
-                    <td>${appointment.patient_name}</td>
-                    <td>${appointment.date}</td> <!-- Display the formatted date -->
-                    <td>${appointment.time}</td>
-                    <td>${appointment.symptoms}</td>
-                    <td>${appointment.disease}</td>
-                    <td>${appointment.status}</td>
-                    <td>${appointment.is_deleted ?
-                        '' :
-                        `<button class="btn btn-warning">Update</button>`
-                    }
-                    </td>
-                `;
-                // Add event listener to the row to trigger the update
-                row.addEventListener('click', function() {
-                    updateAppointment(appointment.appointment_id);
-                });
-                appointmentsList.appendChild(row);
-            });
-
-            // Show pagination controls if more than 10 appointments
-            if (allAppointments.length > appointmentsPerPage) {
-                document.getElementById('paginationControls').style.display = 'block';
-                updatePaginationControls(allAppointments.length);
-            } else {
-                document.getElementById('paginationControls').style.display = 'none';
+                document.getElementById('updateAppointmentPopup').style.display = 'block';
             }
-        }
-    } catch (error) {
-        console.error('Error fetching appointments:', error);
-        document.getElementById('appointmentMessage').textContent = 'Error fetching appointments.';
-    }
-}
 
-// Update the pagination controls
-function updatePaginationControls(totalAppointments) {
-    const totalPages = Math.ceil(totalAppointments / appointmentsPerPage);
-    const prevBtn = document.getElementById('prevPage');
-    const nextBtn = document.getElementById('nextPage');
-    const pageNum = document.getElementById('pageNumber');
+            // Function to close the update appointment popup
+            function closePopup() {
+                document.getElementById('updateAppointmentPopup').style.display = 'none';
+            }
 
-    pageNum.textContent = `Page ${currentPage} of ${totalPages}`;
+            // Event listener for form submission to send the data to the API
+            document.getElementById('updateAppointmentForm').addEventListener('submit', async function (event) {
+                event.preventDefault();
 
-    // Enable/disable prev and next buttons based on the current page
-    prevBtn.disabled = currentPage === 1;
-    nextBtn.disabled = currentPage === totalPages;
-}
+                const appointmentId = document.getElementById('appointmentId').value;
+                const disease = document.getElementById('disease').value;
+                const status = document.getElementById('status').value;
 
-// Handle pagination actions
-function goToPage(pageNumber) {
-    currentPage = pageNumber;
-    fetchAppointments();
-}
+                // Construct the data object for updates
+                const updatedData = {};
+                if (disease !== "") updatedData.disease = disease;  // Only add if there's a new value
+                if (status !== "") updatedData.status = status;    // Only add if there's a new value
 
-// Open the update appointment form in a popup
-async function updateAppointment(appointmentId) {
-    const doctorRegno = localStorage.getItem('doctor_id');
-    const token = localStorage.getItem('access_token');
-    const url = `http://127.0.0.1:8000/doctor/${doctorRegno}/appointment/${appointmentId}`;
+                // Get the doctor ID from localStorage
+                const doctorRegno = localStorage.getItem('doctor_id');
+                const token = localStorage.getItem('access_token');
 
-    try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
-
-        const data = await response.json();
-        const appointment = data.appointment;
-        const patient = appointment.patient_info;
-
-        // Populate the form with the appointment data
-        document.getElementById('appointmentId').value = appointment.appointment_id;
-        document.getElementById('patientName').value = patient.patient_name;
-        document.getElementById('appointmentDate').value = appointment.date;
-        document.getElementById('appointmentTime').value = appointment.time; // Assuming time is part of date_time
-        document.getElementById('symptoms').value = appointment.appointment_symptoms;
-        document.getElementById('status').value = appointment.is_deleted ? 'Cancelled' : 'Active';
-
-        // Show the popup form
-        document.getElementById('updateAppointmentPopup').style.display = 'block';
-    } catch (error) {
-        console.error('Error fetching appointment:', error);
-    }
-}
-
-// Close the popup form
-function closePopup() {
-    document.getElementById('updateAppointmentPopup').style.display = 'none';
-}
-
-// Call the fetchAppointments function when the page loads
-window.onload = () => {
-    fetchAppointments();
-};
-
-   </script>
-    
-    
-    <!-- Get Appointment Stop -->
-
-
-    <!-- Profile Start -->
-    <div id="profile" class="hidden">
-            <h2>Profile</h2>
-            <div class="mb-3">
-                <label for="profileName" class="form-label">Name</label>
-                <input type="text" class="form-control" id="profileName" required readonly>
-            </div>
-            <div class="mb-3">
-                <label for="profileDOB" class="form-label">Department</label>
-                <input type="text" class="form-control" id="department" required readonly>
-            </div>
-            <div class="mb-3">
-                <label for="profileMobile" class="form-label">Mobile Number</label>
-                <input type="text" class="form-control" id="profileMobile" required readonly>
-            </div>
-
-            <button type="button" class="btn btn-primary" onclick="updateProfile()">Update Profile</button>
-    </div>
-    <script>
-            // Fetch doctor profile data and populate fields
-            async function fetchProfile() {
-                const doctorRegno = localStorage.getItem('doctor_id');  // Get doctor ID from localStorage (ensure it is set)
-                const token = localStorage.getItem('access_token');  // Get the token from localStorage
-        
-                // If doctor ID or token is missing, log the error and exit the function
                 if (!doctorRegno || !token) {
-                    console.log('Doctor ID or Token not found in localStorage');
-                    alert('Doctor ID or Token not found. Please log in again.');
+                    console.error('Doctor ID or token not found');
                     return;
                 }
-        
-                const url = `http://127.0.0.1:8000/doctor/${doctorRegno}/profile`;
-        
+
+                try {
+                    const response = await fetch(`http://127.0.0.1:8000/doctor/${doctorRegno}/appointment/${appointmentId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(updatedData),
+                    });
+
+                    if (response.ok) {
+                        alert('Appointment updated successfully');
+                        closePopup();
+                        fetchAppointments(); // Optionally reload the appointments
+                    } else {
+                        const errorData = await response.json();
+                        alert(`Error: ${errorData.detail}`);
+                    }
+                } catch (error) {
+                    console.error('Error updating appointment:', error);
+                    alert('Error updating appointment.');
+                }
+            });
+
+        </script>
+        <!-- Update Appointment By Id Start -->
+
+        <!-- Get all appointment For Doctor Start -->
+        <script>
+            let currentPage = 1;
+            const appointmentsPerPage = 10;
+
+            // Fetch appointments based on doctor ID stored in localStorage
+            async function fetchAppointments() {
+                const doctorRegno = localStorage.getItem('doctor_id'); // Assuming doctor ID is stored in localStorage
+                if (!doctorRegno) {
+                    console.log('Doctor ID not found in localStorage');
+                    return;
+                }
+
+                const token = localStorage.getItem('access_token');  // Assuming you stored the access token in localStorage
+                const url = `http://127.0.0.1:8000/doctors/${doctorRegno}/patients/with-appointments`;
+
                 try {
                     const response = await fetch(url, {
                         method: 'GET',
@@ -434,16 +256,240 @@ window.onload = () => {
                             'Authorization': `Bearer ${token}`,  // Attach the token for authorization
                         },
                     });
-        
+
+                    const data = await response.json();
+                    const patientsWithAppointments = data;
+                    const appointmentsList = document.getElementById('appointmentsList');
+                    const appointmentMessage = document.getElementById('appointmentMessage');
+                    const appointmentsTable = document.getElementById('appointmentsTable');
+
+                    if (patientsWithAppointments.length === 0) {
+                        appointmentMessage.textContent = 'No patients with appointments found.';
+                        appointmentsTable.style.display = 'none';
+                    } else {
+                        appointmentMessage.textContent = '';
+                        appointmentsTable.style.display = 'table';
+
+                        // Flatten appointments and paginate them (show 10 at a time)
+                        const allAppointments = patientsWithAppointments.flatMap(patient => {
+                            return patient.appointments.map(appointment => ({
+                                patient_name: patient.patient_name,
+                                appointment_id: appointment.appointment_id,
+                                date: appointment.date.slice(0, 10),  // Slice the date to remove the time part
+                                time: appointment.time,
+                                symptoms: appointment.symptoms,
+                                disease: patient.patient_disease,
+                                status: appointment.status,
+                                is_deleted: appointment.is_deleted
+                            }));
+                        });
+
+                        const startIndex = (currentPage - 1) * appointmentsPerPage;
+                        const endIndex = startIndex + appointmentsPerPage;
+                        const paginatedAppointments = allAppointments.slice(startIndex, endIndex);
+
+                        // Clear the existing table rows
+                        appointmentsList.innerHTML = '';
+
+                        // Loop through the appointments and add rows to the table
+                        paginatedAppointments.forEach((appointment, index) => {
+                            const row = document.createElement('tr');
+                            row.classList.add('clickable-row');
+                            row.setAttribute('data-appointment-id', appointment.appointment_id); // Add data attribute
+                            row.innerHTML = `
+                    <td>${startIndex + index + 1}</td> <!-- Row number -->
+                    <td>${appointment.patient_name}</td>
+                    <td>${appointment.date}</td> <!-- Display the formatted date -->
+                    <td>${appointment.time}</td>
+                    <td>${appointment.symptoms}</td>
+                    <td>${appointment.disease}</td>
+                    <td>${appointment.status}</td>
+                    <td>
+                        ${appointment.is_deleted ?
+                                    '' :
+                                    `<button class="btn btn-warning update-btn">Update</button>`
+                                }
+                    </td>
+
+                `;
+                            // Add event listener to the row to trigger the update
+                            row.querySelectorAll('td:not(:last-child)').forEach(cell => {
+                                cell.addEventListener('click', function () {
+                                    updateAppointment(appointment.appointment_id);
+                                });
+                            });
+
+                            // Add event listener to the "Update" button to trigger the update function
+                            const updateButton = row.querySelector('.update-btn');
+                            if (updateButton) {
+                                updateButton.addEventListener('click', function (event) {
+                                    event.stopPropagation(); // Prevent row click event from being triggered
+                                    updateAppointment(appointment.appointment_id);
+                                });
+                            }
+
+                            appointmentsList.appendChild(row);
+                        });
+
+                        // Show pagination controls if more than 10 appointments
+                        if (allAppointments.length > appointmentsPerPage) {
+                            document.getElementById('paginationControls').style.display = 'block';
+                            updatePaginationControls(allAppointments.length);
+                        } else {
+                            document.getElementById('paginationControls').style.display = 'none';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching appointments:', error);
+                    document.getElementById('appointmentMessage').textContent = 'Error fetching appointments.';
+                }
+            }
+
+            // Update the pagination controls
+            function updatePaginationControls(totalAppointments) {
+                const totalPages = Math.ceil(totalAppointments / appointmentsPerPage);
+                const prevBtn = document.getElementById('prevPage');
+                const nextBtn = document.getElementById('nextPage');
+                const pageNum = document.getElementById('pageNumber');
+
+                pageNum.textContent = `Page ${currentPage} of ${totalPages}`;
+
+                // Enable/disable prev and next buttons based on the current page
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages;
+            }
+
+            // Handle pagination actions
+            function goToPage(pageNumber) {
+                currentPage = pageNumber;
+                fetchAppointments();
+            }
+
+            // Open the update appointment form in a popup
+            async function updateAppointment(appointmentId) {
+                const doctorRegno = localStorage.getItem('doctor_id');
+                const token = localStorage.getItem('access_token');
+                const url = `http://127.0.0.1:8000/doctor/${doctorRegno}/appointment/${appointmentId}`;
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        },
+                    });
+
+                    const data = await response.json();
+                    const appointment = data.appointment;
+                    const patient = appointment.patient_info;
+
+                    // Populate the form with the appointment data
+                    document.getElementById('appointmentId').value = appointment.appointment_id;
+                    document.getElementById('patientName').value = patient.patient_name;
+                    document.getElementById('appointmentDate').value = appointment.date;
+                    document.getElementById('appointmentTime').value = appointment.time; // Assuming time is part of date_time
+                    document.getElementById('symptoms').value = appointment.appointment_symptoms;
+                    document.getElementById('status').value = appointment.is_deleted ? 'Cancelled' : 'Active';
+
+                    // Show the popup form
+                    document.getElementById('updateAppointmentPopup').style.display = 'block';
+                } catch (error) {
+                    console.error('Error fetching appointment:', error);
+                }
+            }
+
+            // Close the popup form
+            function closePopup() {
+                document.getElementById('updateAppointmentPopup').style.display = 'none';
+            }
+
+            // Call the fetchAppointments function when the page loads
+            window.onload = () => {
+                fetchAppointments();
+            };
+
+        </script>
+        <!-- Get all appointment For Doctor Stop -->
+        <!-- Get Appointment Stop -->
+
+
+        <!-- Profile Start -->
+      <!-- Profile Section -->
+<div id="profile" class="hidden">
+    <h2>Profile</h2>
+    <div class="mb-3">
+        <label for="profileName" class="form-label">Name</label>
+        <input type="text" class="form-control" id="profileName" required readonly>
+    </div>
+    <div class="mb-3">
+        <label for="profileDOB" class="form-label">Department</label>
+        <input type="text" class="form-control" id="department" required readonly>
+    </div>
+    <div class="mb-3">
+        <label for="profileMobile" class="form-label">Mobile Number</label>
+        <input type="text" class="form-control" id="profileMobile" required readonly>
+    </div>
+
+    <button type="button" class="btn btn-primary" onclick="updateProfile()">Update Profile</button>
+</div>
+
+<!-- Update Profile Form Popup -->
+<div id="updateProfilePopup" class="hidden">
+    <h2>Update Profile</h2>
+    <div class="mb-3">
+        <label for="updateProfileFirstName" class="form-label">First Name</label>
+        <input type="text" class="form-control" id="updateProfileFirstName" required>
+    </div>
+    <div class="mb-3">
+        <label for="updateProfileLastName" class="form-label">Last Name</label>
+        <input type="text" class="form-control" id="updateProfileLastName" required>
+    </div>
+    <div class="mb-3">
+        <label for="updateDepartment" class="form-label">Department</label>
+        <input type="text" class="form-control" id="updateDepartment" required>
+    </div>
+    <div class="mb-3">
+        <label for="updateProfileMobile" class="form-label">Mobile Number</label>
+        <input type="text" class="form-control" id="updateProfileMobile" required>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="saveUpdatedProfile()">Save Changes</button>
+    <button type="button" class="btn btn-secondary" onclick="closeUpdatePopup()">Cancel</button>
+</div>
+
+
+
+        <script>
+            // Fetch doctor profile data and populate fields
+            async function fetchProfile() {
+                const doctorRegno = localStorage.getItem('doctor_id');  // Get doctor ID from localStorage (ensure it is set)
+                const token = localStorage.getItem('access_token');  // Get the token from localStorage
+
+                // If doctor ID or token is missing, log the error and exit the function
+                if (!doctorRegno || !token) {
+                    console.log('Doctor ID or Token not found in localStorage');
+                    alert('Doctor ID or Token not found. Please log in again.');
+                    return;
+                }
+
+                const url = `http://127.0.0.1:8000/doctor/${doctorRegno}/profile`;
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,  // Attach the token for authorization
+                        },
+                    });
+
                     const data = await response.json();
                     if (response.ok) {
                         // Populate the profile form fields with the fetched data
                         const doctorProfile = data.doctor_profile || {};  // Ensure it doesn't throw an error if doctor_profile is missing
-        
+
                         document.getElementById('profileName').value = doctorProfile.doctor_name || 'Not Available';
                         document.getElementById('department').value = doctorProfile.department || 'Not Available';  // Fallback if department is missing
                         document.getElementById('profileMobile').value = doctorProfile.mobile || 'Not Available';  // Fallback if mobile is missing
-        
+
                         // Show the profile div
                         document.getElementById('profile').classList.remove('hidden');
                     } else {
@@ -455,8 +501,193 @@ window.onload = () => {
                     alert('An error occurred while fetching the doctor profile. Please try again later.');
                 }
             }
-    </script>
-    <!-- Profile Stop -->
+        </script>
+<script>
+    // Function to show the update profile popup and populate the fields with current data
+function updateProfile() {
+    // Get the doctor's regno from localStorage (assuming it's stored there)
+    const doctorRegno = localStorage.getItem('doctor_id'); // or 'doctorId'
+
+    // Check if doctorRegno is null or not available
+    if (!doctorRegno) {
+        console.error('Doctor regno is not available in localStorage');
+        alert('Unable to fetch profile, please log in again.');
+        return;
+    }
+
+    // Check if the element exists before accessing its value
+    const firstNameInput = document.getElementById('updateProfileFirstName');
+    const lastNameInput = document.getElementById('updateProfileLastName');
+    const departmentInput = document.getElementById('updateDepartment');
+    const mobileInput = document.getElementById('updateProfileMobile');
+
+    if (!firstNameInput || !lastNameInput || !departmentInput || !mobileInput) {
+        console.error("One or more form elements are missing");
+        return; // Early exit if any element is not found
+    }
+
+    // Fetch the doctor profile from the API using the regno from localStorage
+    const token = localStorage.getItem('access_token'); // Get the auth token from localStorage
+    if (!token) {
+        console.error('Authentication token is not available in localStorage');
+        alert('Unable to fetch profile, please log in again.');
+        return;
+    }
+
+    fetch(`http://127.0.0.1:8000/doctor/${doctorRegno}/profile`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.detail || 'Unauthorized');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Access the doctor_profile object
+        const profile = data.doctor_profile;  // Now referencing doctor_profile object
+
+        // Check if the data has the necessary fields
+        if (!profile || !profile.doctor_name || !profile.department || !profile.mobile) {
+            throw new Error('Profile data is incomplete');
+        }
+
+        const fullName = profile.doctor_name; // Example: "John Doe"
+        const department = profile.department; // Example: "Cardiology"
+        const mobile = profile.mobile; // Example: "1234567890"
+
+        // Split the full name into first name and last name
+        const nameParts = fullName.split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' '); // Join the rest of the name as the last name
+
+        // Populate the form fields with the fetched data
+        firstNameInput.value = firstName;
+        lastNameInput.value = lastName;
+        departmentInput.value = department;
+        mobileInput.value = mobile;
+
+        // Now show the popup form
+        document.getElementById('profile').classList.add('hidden');
+        document.getElementById('updateProfilePopup').classList.remove('hidden');
+    })
+    .catch(error => {
+        console.error('Error fetching doctor profile:', error);
+        alert('Error fetching profile: ' + error.message);
+    });
+}
+
+// Function to submit the updated profile data
+function submitUpdatedProfile() {
+    const doctorRegno = localStorage.getItem('doctor_id');
+    const token = localStorage.getItem('access_token');
+
+    if (!doctorRegno || !token) {
+        alert('Please log in again');
+        return;
+    }
+
+    const firstName = document.getElementById('updateProfileFirstName').value;
+    const lastName = document.getElementById('updateProfileLastName').value;
+    const department = document.getElementById('updateDepartment').value;
+    const mobile = document.getElementById('updateProfileMobile').value;
+
+    const updatedData = {
+        firstname: firstName,
+        lastname: lastName,
+        department: department,
+        mobile: mobile,
+    };
+
+    fetch(`http://127.0.0.1:8000/doctor/${doctorRegno}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedData),
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.detail || 'Failed to update profile');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.detail); // Show success message
+        document.getElementById('updateProfilePopup').classList.add('hidden');
+        document.getElementById('profile').classList.remove('hidden');
+    })
+    .catch(error => {
+        console.error('Error updating profile:', error);
+        alert('Error updating profile: ' + error.message);
+    });
+}
+
+</script>
+<script>
+    function saveUpdatedProfile() {
+    const doctorRegno = localStorage.getItem('doctor_id');
+    const token = localStorage.getItem('access_token');
+
+    if (!doctorRegno || !token) {
+        alert('Please log in again');
+        return;
+    }
+
+    const firstName = document.getElementById('updateProfileFirstName').value;
+    const lastName = document.getElementById('updateProfileLastName').value;
+    const department = document.getElementById('updateDepartment').value;
+    const mobile = document.getElementById('updateProfileMobile').value;
+
+    const updatedData = {
+        firstname: firstName,
+        lastname: lastName,
+        department: department,
+        mobile: mobile,
+    };
+
+    fetch(`http://127.0.0.1:8000/doctor/${doctorRegno}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedData),
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.detail || 'Failed to update profile');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.detail); // Show success message
+        document.getElementById('updateProfilePopup').classList.add('hidden');
+        document.getElementById('profile').classList.remove('hidden');
+
+        // Reload the page after successfully updating the profile
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error updating profile:', error);
+        alert('Error updating profile: ' + error.message);
+    });
+}
+
+</script>
+    
+        
+        <!-- Profile Stop -->
 
     </div>
 
@@ -467,16 +698,16 @@ window.onload = () => {
             document.querySelectorAll('.main > div').forEach(div => {
                 div.classList.add('hidden');
             });
-    
+
             // Show the clicked section
             const selectedSection = document.getElementById(sectionId);
             selectedSection.classList.remove('hidden');
-    
+
             // Trigger fetchProfile or fetchAppointments based on sectionId
             if (sectionId === 'getPatient' || sectionId === 'getAppointments') {
                 fetchAppointments();  // Fetch appointments when the "All Appointments" or "Get Appointments" section is shown
             }
-    
+
             if (sectionId === 'profile') {
                 fetchProfile();  // Fetch profile when the "Profile" section is shown
             }
@@ -495,7 +726,7 @@ window.onload = () => {
             localStorage.removeItem('doctor_id');
 
             // Redirect to the login page or perform other logout operations
-            window.location.href = '/'; // Update with your login page URL
+            window.location.href = 'index.html'; // Update with your login page URL
         }
 
         // Close dropdown if clicked outside
@@ -517,4 +748,5 @@ window.onload = () => {
     </script>
 
 </body>
+
 </html>

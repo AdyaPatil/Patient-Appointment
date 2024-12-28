@@ -170,6 +170,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+
 # API'S Start From here
 
 
@@ -335,13 +336,9 @@ async def get_single_appointment_for_doctor(id: str, appointment_id: int, db: db
         }, "token": token}
     
     
-
-
 # Update single apointment
 @app.put("/doctor/{id}/appointment/{appointment_id}", status_code=status.HTTP_200_OK)
-async def update_appointment_and_patient_disease(
-    id: str, appointment_id: int, updated_data: dict, db: db_dependency, token: str = Depends(get_token)
-):
+async def update_appointment_and_patient_disease(id: str, appointment_id: int, updated_data: dict, db: db_dependency, token: str = Depends(get_token)):
 
     # Fetch the doctor based on the regno
     doctor = (
@@ -421,10 +418,86 @@ async def update_appointment_and_patient_disease(
     }
 
 
+# Add Next Appointment for Patient
+@app.post("/doctor/{id}/appointment/{appointment_id}/new", status_code=status.HTTP_201_CREATED)
+async def create_new_appointment_for_patient(
+    id: str,
+    appointment_id: int,
+    new_appointment_data: Appointment,  # Expecting an Appointment model (Pydantic schema)
+    db: Session = Depends(get_db),
+    token: str = Depends(get_token)
+):
+    # Fetch the doctor based on the regno
+    doctor = (
+        db.query(models.Doctor)
+        .filter(models.Doctor.regno == id, models.Doctor.is_deleted == False)
+        .first()
+    )
+
+    if not doctor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Doctor not found or has been deleted",
+        )
+
+    # Fetch the current appointment using the appointment_id
+    appointment = (
+        db.query(models.Appointment)
+        .filter(
+            models.Appointment.id == appointment_id,
+            models.Appointment.doctor_regno == id,
+            models.Appointment.is_deleted == False,
+        )
+        .first()
+    )
+
+    if not appointment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Appointment not found or has been deleted",
+        )
+
+    # Fetch the patient based on the patient_uid
+    patient = db.query(models.Patient).filter(models.Patient.uid == appointment.patient_uid).first()
+
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient not found"
+        )
+
+    # Create a new appointment using the Appointment Pydantic model data
+    new_appointment = models.Appointment(
+        doctor_regno=id,
+        patient_uid=patient.uid,
+        date=new_appointment_data.date,  # New date from the request
+        time=new_appointment_data.time,  # New time from the request
+        day=new_appointment_data.day,    # New day from the request
+        symptoms=new_appointment_data.symptoms,  # Symptoms from the request
+        status=new_appointment_data.status or "PENDING",  # Status default is "PENDING"
+        is_deleted=False
+    )
+
+    db.add(new_appointment)
+    db.commit()
+    db.refresh(new_appointment)
+
+    # Return the new appointment details
+    return {
+        "detail": "New appointment created successfully",
+        "appointment": {
+            "appointment_id": new_appointment.id,
+            "date": new_appointment.date,
+            "time": new_appointment.time,
+            "day": new_appointment.day,
+            "status": new_appointment.status,
+            "patient_name": f"{patient.firstname} {patient.lastname}",
+        },
+    }
+
+
 # Delete each apointment of each doctor
-@app.delete(
-    "/doctor/{id}/appointment/{appointment_id}", status_code=status.HTTP_200_OK
-)
+@app.delete("/doctor/{id}/appointment/{appointment_id}", status_code=status.HTTP_200_OK)
 async def delete_appointment(id: str, appointment_id: int, db: db_dependency, token: str = Depends(get_token)):
 
     doctor = (
@@ -522,7 +595,6 @@ async def get_patients_for_doctor_with_appointments(id: str, db: db_dependency, 
         ]
        
 
-
 # Get Doctor Profile
 @app.get("/doctor/{id}/profile", status_code=status.HTTP_200_OK)
 async def get_doctor_profile(id: str, db: db_dependency, token: str = Depends(get_token)):
@@ -554,7 +626,6 @@ async def get_doctor_profile(id: str, db: db_dependency, token: str = Depends(ge
 # Update Doctor Profile
 @app.put("/doctor/{id}", status_code=status.HTTP_200_OK)
 async def update_doctor(id: str, updated_data: dict, db: db_dependency, token: str = Depends(get_token)):
-
     db_doctor = db.query(models.Doctor).filter(models.Doctor.regno == id).first()
 
     if not db_doctor:
@@ -568,6 +639,7 @@ async def update_doctor(id: str, updated_data: dict, db: db_dependency, token: s
             detail="Doctor account is deleted and cannot be updated",
         )
 
+    # Loop through the updated data and apply changes to the database model
     for key, value in updated_data.items():
         if hasattr(db_doctor, key) and value is not None:
             setattr(db_doctor, key, value)
@@ -578,10 +650,14 @@ async def update_doctor(id: str, updated_data: dict, db: db_dependency, token: s
     if token is not None:
         return {
             "detail": f"Doctor with regno {id} updated successfully",
-            "updated_data": db_doctor,
-            "token" : token
+            "updated_data": {
+                "regno": db_doctor.regno,
+                "doctor_name": f"{db_doctor.firstname} {db_doctor.lastname}",
+                "department": db_doctor.department,
+                "mobile": db_doctor.mobile
+            },
+            "token": token
         }
-
 
 # Delete doctor
 @app.delete("/doctor/{id}", status_code=status.HTTP_200_OK)
@@ -612,8 +688,6 @@ async def delete_doctor(id: str, db: db_dependency, token: str = Depends(get_tok
         }
 
 # Doctors All API Stop Here
-
-
 
 
 
@@ -722,8 +796,6 @@ async def create_appointment(appointment: Appointment, db: db_dependency, token:
             "symptoms": new_appointment.symptoms,
             "status": new_appointment.status.value,
         }
-
-
 
 
 # Get All Apointments of each Patient
@@ -843,6 +915,7 @@ async def get_single_appointment(id: str, appointment_id: int, db: db_dependency
             "token": token
         }
 
+
 # Update Apointment using apointment id
 @app.put("/patient/{id}/appointment/{appointment_id}", status_code=status.HTTP_200_OK)
 async def update_appointment(
@@ -904,7 +977,6 @@ async def update_appointment(
     }
 
 
-
 # Delete or Cancel Apointment
 @app.delete("/patient/{id}/appointment/{appointment_id}", status_code=status.HTTP_200_OK)
 async def delete_appointment(
@@ -946,7 +1018,6 @@ async def delete_appointment(
         "detail": f"Appointment with ID {appointment_id} has been marked as deleted",
         "token": token,
     }
-
 
 
 # Get all Doctors
@@ -1085,8 +1156,8 @@ async def delete_patient(id: int, db: db_dependency,  token: str = Depends(get_t
     if token is not None:
         return {"detail": f"Patient with UID {id} has been marked as deleted", "token" : token}
 
-
 # Patients All API Stop Here
+
 
 
 # Extra For Filtering
