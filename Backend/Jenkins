@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('clean workspace') {
+            steps {
+                cleanWs()  // Cleans the workspace at the beginning
+            }
+        }
+
+        stage('clone docker repo') {
+            steps {
+                sh 'git clone https://github.com/AdyaPatil/Patient-Appointment.git'
+            }
+        }
+
+        stage('building docker image') {
+            steps {
+                sh 'cd Patient-Appointment && cd Backend && docker build -t image:test .'
+                sh 'docker tag image:test adi2634/demo-pipeline:latest'
+            }
+        }
+
+        stage('push docker to dockerhub') {
+            steps {
+                script {
+                    // Push the image to Docker Hub
+                    docker.withRegistry('', 'adinathdockerhub') {
+                        sh "docker push adi2634/demo-pipeline:latest"
+                    }
+                }
+            }
+        }
+
+        stage('run docker image') {
+            steps {
+                sh 'docker run -d -p 8000:8000 adi2634/demo-pipeline:latest'
+            }
+        }
+
+        stage('clean workspace after build') {
+            steps {
+                cleanWs()  // Clean workspace after all stages to remove leftovers
+            }
+        }
+    }
+}
