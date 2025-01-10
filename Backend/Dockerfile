@@ -41,8 +41,11 @@ ENV SQLALCHEMY_DATABASE_URL=mysql+pymysql://user:password@db:3306/database_name
 # Copy frontend files from the frontend stage
 COPY --from=frontend /usr/share/nginx/html /usr/share/nginx/html
 
-# Expose the backend port
+# Expose the backend port (FastAPI)
 EXPOSE 7002
 
-# Command to run FastAPI application
+# Expose the frontend port (Nginx)
+EXPOSE 80
+
+# Command to run FastAPI application and Nginx together
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 7002 & nginx -g 'daemon off;'"]
