@@ -44,4 +44,4 @@ COPY --from=frontend /usr/share/nginx/html /usr/share/nginx/html
 EXPOSE 8000
 
 # Command to run FastAPI application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]
