@@ -1,7 +1,7 @@
 # Stage 1: Backend
 FROM python:3.10-slim AS backend
 
-# Set working directory
+# Set working directory for backend
 WORKDIR /app/backend
 
 # Copy backend requirements file (inside Backend folder, not inside venv)
@@ -26,13 +26,22 @@ RUN rm -rf ./*
 COPY Frontend /usr/share/nginx/html
 
 # Stage 3: Final stage combining backend and frontend
-FROM backend AS final
+FROM python:3.10-slim AS final
 
-# Expose backend port
-EXPOSE 8000
+# Set working directory for backend
+WORKDIR /app/backend
+
+# Copy the backend application from the backend stage
+COPY --from=backend /app/backend /app/backend
 
 # Set environment variable for SQLAlchemy database URL
 ENV SQLALCHEMY_DATABASE_URL=mysql+pymysql://user:password@db:3306/database_name
+
+# Copy frontend files from the frontend stage
+COPY --from=frontend /usr/share/nginx/html /usr/share/nginx/html
+
+# Expose the backend port
+EXPOSE 8000
 
 # Command to run FastAPI application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
