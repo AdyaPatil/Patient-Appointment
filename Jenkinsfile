@@ -52,18 +52,5 @@ pipeline {
                 }
             }
         }
-        stage('Run Containers Locally') {
-            steps {
-                script {
-                    // Pull images from ECR and run containers locally (optional)
-                    sh "docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}"
-                    sh "docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}"
-
-                    // Run backend and frontend containers
-                    sh "docker run -d --name backend-container -p 7002:7002 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}"
-                    sh "docker run -d --name frontend-container -p 80:80 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}"
-                }
-            }
-        }
     }
 }
