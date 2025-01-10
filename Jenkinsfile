@@ -25,7 +25,7 @@ pipeline {
         stage('Build Backend Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t backend-image ./Backend'
+                    sh 'docker build -t backend-image -f Backend/Dockerfile .'
                     sh "docker tag backend-image:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}"
                 }
             }
