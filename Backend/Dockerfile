@@ -4,10 +4,11 @@ FROM python:3.10-slim AS backend
 # Set working directory
 WORKDIR /app/backend
 
-# Copy backend files
+# Copy backend requirements
 COPY Backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the entire Backend directory to the container
 COPY Backend /app/backend
 
 # Stage 2: Frontend
