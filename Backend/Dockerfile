@@ -41,6 +41,9 @@ ENV SQLALCHEMY_DATABASE_URL=mysql+pymysql://user:password@db:3306/database_name
 # Copy frontend files from the frontend stage
 COPY --from=frontend /usr/share/nginx/html /usr/share/nginx/html
 
+# Install Nginx (if you intend to use Nginx directly from this stage)
+RUN apt-get update && apt-get install -y nginx
+
 # Expose the backend port (FastAPI)
 EXPOSE 7002
 
