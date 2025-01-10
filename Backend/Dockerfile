@@ -4,13 +4,13 @@ FROM python:3.10-slim AS backend
 # Set working directory for backend
 WORKDIR /app/backend
 
-# Copy backend requirements file (inside Backend folder, not inside venv)
+# Copy backend requirements file
 COPY Backend/requirements.txt .
 
-# Install dependencies from requirements.txt
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire Backend directory (this includes the code and models)
+# Copy backend code
 COPY Backend /app/backend
 
 # Stage 2: Frontend
