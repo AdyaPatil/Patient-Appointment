@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        AWS_ACCOUNT_ID = '891612560902'  // Your AWS Account ID
         AWS_REGION = 'ap-south-1'
+        AWS_ACCOUNT_ID = '891612560902'
         BACKEND_REPO = 'fastapi-backend'
         FRONTEND_REPO = 'fastapi-frontend'
         IMAGE_TAG = 'latest'
@@ -10,13 +10,15 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm  // Pulls the latest code from GitHub
+                checkout scm
             }
         }
         stage('Authenticate Docker to AWS ECR') {
             steps {
-                script {
-                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                withCredentials([aws(credentialsId: 'aws-credentials-id', region: AWS_REGION)]) {
+                    script {
+                        sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                    }
                 }
             }
         }
