@@ -40,7 +40,7 @@ pipeline {
         stage('Build Frontend Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t frontend-image -f Frontend/Dockerfile .'
+                    sh 'docker build -t frontend-image -f Backend/Dockerfile .'
                     sh "docker tag frontend-image:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}"
                 }
             }
