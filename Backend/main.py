@@ -1,6 +1,6 @@
 # Importing dependencies and packages 
 from fastapi import FastAPI, HTTPException, Depends, status, Path, Query, Request
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Annotated
 import models
 from database import engine, SessionLocal
@@ -65,7 +65,7 @@ class Patient(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-@validator('date_of_birth')
+@field_validator('date_of_birth')
 def validate_date_of_birth(cls, v):
         # Assuming the format is dd-mm-yyyy, you can parse it into a datetime object
         return datetime.strptime(v, "%d-%m-%Y").date()  # Converting to date object
