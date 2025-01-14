@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        AWS_REGION = 'ap-south-1'
-        AWS_ACCOUNT_ID = '891612560902'
+        AWS_REGION = 'eu-north-1'
+        AWS_ACCOUNT_ID = '043309346867'
         BACKEND_REPO = 'fastapi-backend'
         FRONTEND_REPO = 'fastapi-frontend'
         DATABASE_REPO = 'fastapi-database'  // Add database repo
