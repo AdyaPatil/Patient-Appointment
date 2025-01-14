@@ -4,14 +4,14 @@ FROM python:3.10-slim AS backend
 # Set working directory for backend
 WORKDIR /app/backend
 
-# Copy backend requirements file
+# Copy only the requirements file to leverage Docker caching
 COPY Backend/requirements.txt .
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install uvicorn
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir uvicorn
 
-# Copy backend code
+# Copy the backend code after dependencies are installed
 COPY Backend /app/backend
 
 # Set environment variable for SQLAlchemy database URL
